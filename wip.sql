@@ -25,8 +25,17 @@ DROP TABLE TELEMETRIA_CARRERA.pais;
 DROP TABLE TELEMETRIA_CARRERA.bandera;
 
 ------------------- DROP DE PROCEDURES -------------------
--- Los procedurales de los inserts
--- DROP PROCEDURE migrar_....
+DROP PROCEDURE migrar_caja
+DROP PROCEDURE migrar_motor 
+DROP PROCEDURE migrar_freno 
+DROP PROCEDURE migrar_tipo_neumatico 
+DROP PROCEDURE migrar_tipo_sector 
+DROP PROCEDURE migrar_tipo_incidente 
+DROP PROCEDURE migrar_pais 
+DROP PROCEDURE migrar_bandera 
+DROP PROCEDURE migrar_escuderia
+DROP PROCEDURE migrar_piloto
+
 
 ------------------- DROP DE VISTAS -------------------
 -- DROP VIEW TELEMETRIA_CARRERA.nobre_vista;

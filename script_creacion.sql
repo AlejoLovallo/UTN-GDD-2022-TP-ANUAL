@@ -11,7 +11,7 @@ CREATE TABLE TELEMETRIA_CARRERA.carrera (
     carrera_clima varchar(100) NOT NULL,
     carrera_total_carrera numeric(18,2) NOT NULL,
     carrera_cant_vueltas INT NOT NULL,
-    circuito_codigo INT NOT NULL REFERENCES TELEMETRIA_CARRERA.circuito,
+    circuito_codigo INT NOT NULL REFERENCES TELEMETRIA_CARRERA.circuito
 );
 
 
@@ -21,7 +21,7 @@ CREATE TABLE TELEMETRIA_CARRERA.circuito (
     circuito_codigo INT NOT NULL PRIMARY KEY,
     circuito_nombre NVARCHAR NOT NULL,
     id_pais smallint NOT NULL REFERENCES TELEMETRIA_CARRERA.pais,
-    codigo_sector  NOT NULL REFERENCES TELEMETRIA_CARRERA.sector,
+    codigo_sector  NOT NULL REFERENCES TELEMETRIA_CARRERA.sector
 );
 
 
@@ -45,7 +45,7 @@ CREATE TABLE TELEMETRIA_CARRERA.incidente (
     id_indicente_bandera NVARCHAR NOT NULL REFERENCES TELEMETRIA_CARRERA.bandera,
     auto_numero  NOT NULL,
     incidente_tipo  NOT NULL REFERENCES TELEMETRIA_CARRERA.tipo_incidente,
-    incidente_numero_vuelta  NOT NULL,
+    incidente_numero_vuelta  NOT NULL
 );
 
 
@@ -53,30 +53,29 @@ IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'auto')
 CREATE TABLE TELEMETRIA_CARRERA.auto (
     auto_numero INT NOT NULL,
     cod_escuderia INT NOT NULL REFERENCES TELEMETRIA_CARRERA.escuderia,
-    auto_modelo NVARCHAR NOT NULL,
+    auto_modelo NVARCHAR(255) NOT NULL,
     cod_piloto INT NOT NULL,
     PRIMARY KEY (auto_numero, cod_escuderia)
 );
 
 
--- auto tiene clave compuesta OJO
+-- Escuderia
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'escuderia')
 CREATE TABLE TELEMETRIA_CARRERA.escuderia (
-    cod_escuderia INT NOT NULL PRIMARY KEY,
-    escuderia_nombre NVARCHAR NOT NULL,
-    escuderia_nacionalidad NVARCHAR NOT NULL,
-    auto_numero  INT NOT NULL REFERENCES TELEMETRIA_CARRERA.auto,
-    auto_numero_2  INT NOT NULL REFERENCES TELEMETRIA_CARRERA.auto,
+    cod_escuderia INT NOT NULL IDENTITY PRIMARY KEY,
+    escuderia_nombre NVARCHAR(255) NOT NULL,
+    escuderia_nacionalidad NVARCHAR(255) NOT NULL
 );
 
 
+-- Piloto
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'piloto')
 CREATE TABLE TELEMETRIA_CARRERA.piloto (
-    cod_piloto INT NOT NULL PRIMARY KEY,
-    piloto_nombre NVARCHAR NOT NULL,
-    piloto_apellido NVARCHAR NOT NULL,
-    piloto_nacionalidad NVARCHAR NOT NULL,
-    piloto_fecha_nacimiento timestamp with time zone NOT NULL,
+    cod_piloto INT NOT NULL IDENTITY PRIMARY KEY,
+    piloto_nombre NVARCHAR(50) NOT NULL,
+    piloto_apellido NVARCHAR(50) NOT NULL,
+    piloto_nacionalidad NVARCHAR(50) NOT NULL,
+    piloto_fecha_nacimiento DATETIME NOT NULL
 );
 
 
@@ -87,7 +86,7 @@ CREATE TABLE TELEMETRIA_CARRERA.parada_box (
     parada_box_tiempo numeric(18,2) NOT NULL,
     codigo_carrera INT NOT NULL REFERENCES TELEMETRIA_CARRERA.carrera,
     auto_numero INT NOT NULL, -- !!!
-    cod_escuderia INT NOT NULL, -- !!!
+    cod_escuderia INT NOT NULL -- !!!
 );
 
 
@@ -98,7 +97,7 @@ CREATE TABLE TELEMETRIA_CARRERA.neumatico (
     neumatico_estado NVARCHAR NOT NULL,
     neumatico_posicion  NOT NULL,
     id_tipo_neumatico smallint NOT NULL REFERENCES TELEMETRIA_CARRERA.tipo_neumatico,
-    neumatico_profundidad numeric(18,2) NOT NULL,
+    neumatico_profundidad numeric(18,2) NOT NULL
 );
 
 
@@ -124,7 +123,7 @@ CREATE TABLE TELEMETRIA_CARRERA.telemetria_auto (
     caja_nro_serie NVARCHAR NOT NULL,
     motor_nro_serie NVARCHAR NOT NULL,
     neumatico_nro_serie NVARCHAR NOT NULL,
-    freno_nro_serie NVARCHAR NOT NULL,
+    freno_nro_serie NVARCHAR NOT NULL
 );
 
 
@@ -177,27 +176,27 @@ CREATE TABLE TELEMETRIA_CARRERA.telemetria_caja (
     PRIMARY KEY (tele_auto_cod, caja_nro_serie)
 );
 
-
+-- Caja
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'caja')
 CREATE TABLE TELEMETRIA_CARRERA.caja (
     caja_nro_serie INT NOT NULL PRIMARY KEY,
     caja_modelo NVARCHAR NOT NULL,
-    caja_desgaste numeric(18,2) NOT NULL,
+    caja_desgaste numeric(18,2) NOT NULL
 );
 
 
+-- Motor
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'motor')
 CREATE TABLE TELEMETRIA_CARRERA.motor (
     motor_nro_serie INT NOT NULL PRIMARY KEY,
-    motor_modelo NVARCHAR NOT NULL,
+    motor_modelo NVARCHAR NOT NULL
 );
 
-
+-- Freno
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'freno')
 CREATE TABLE TELEMETRIA_CARRERA.freno (
     freno_nro_serie INT NOT NULL PRIMARY KEY,
-    freno_nro  NOT NULL,
-    freno_tamanio_pastilla numeric(18,2) NOT NULL,
+    freno_tamanio_pastilla numeric(18,2) NOT NULL
 );
 
 
@@ -229,35 +228,38 @@ CREATE TABLE TELEMETRIA_CARRERA.parada_box_por_auto (
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'tipo_neumatico')
 CREATE TABLE TELEMETRIA_CARRERA.tipo_neumatico (
     id_tipo_neumatico smallint NOT NULL PRIMARY KEY,
-    descripcion NVARCHAR NOT NULL,
+    descripcion NVARCHAR(255) NOT NULL
 );
 
 
+-- Tipo Sector
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'tipo_sector')
 CREATE TABLE TELEMETRIA_CARRERA.tipo_sector (
-    id_tipo_sector smallint NOT NULL PRIMARY KEY,
-    descripcion NVARCHAR NOT NULL,
+    id_tipo_sector smallint NOT NULL IDENTITY PRIMARY KEY,
+    descripcion NVARCHAR(255) NOT NULL
 );
 
 
+-- Tipo Incidente
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'tipo_incidente')
 CREATE TABLE TELEMETRIA_CARRERA.tipo_incidente (
-    id_tipo_incidente SMAILLINT NOT NULL PRIMARY KEY,
-    descripcion NVARCHAR NOT NULL,
+    id_tipo_incidente SMAILLINT NOT NULL IDENTITY PRIMARY KEY,
+    descripcion NVARCHAR(255) NOT NULL
 );
 
 
+-- Pais
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'pais')
 CREATE TABLE TELEMETRIA_CARRERA.pais (
-    id_pais smallint NOT NULL PRIMARY KEY,
-    nombre NVARCHAR NOT NULL,
+    id_pais smallint NOT NULL IDENTITY PRIMARY KEY,
+    nombre NVARCHAR(50) NOT NULL
 );
 
-
+-- Bandera
 IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'bandera')
 CREATE TABLE TELEMETRIA_CARRERA.bandera (
-    id_incidente_bandera smallint NOT NULL PRIMARY KEY,
-    descripcion NVARCHAR NOT NULL,
+    id_incidente_bandera smallint NOT NULL IDENTITY PRIMARY KEY,
+    descripcion NVARCHAR(255) NOT NULL
 );
 GO
 
@@ -273,6 +275,7 @@ CREATE VIEW TELEMETRIA_CARRERA.v_nombre AS
 GO
 */
 
+
 ------------------- CREACION DE STORED PROCEDURES PARA MIGRACION -------------------
 /*
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_nombreTabla')
@@ -280,20 +283,194 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_nombreTabla')
 GO
 
 CREATE PROCEDURE migrar_nombreTabla
- AS
-  BEGIN
+AS
+BEGIN
     INSERT INTO 
 	SELECT DISTINCT 
 	FROM gd_esquema.Maestra
   END
 GO
 */
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_caja')
+	DROP PROCEDURE migrar_caja
+GO
+
+CREATE PROCEDURE migrar_caja
+AS
+BEGIN
+INSERT INTO caja
+(caja_nro_serie, caja_modelo, caja_desgaste)
+SELECT TELE_CAJA_NRO_SERIE, TELE_CAJA_MODELO, TELE_CAJA_DESGASTE
+FROM gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_motor')
+	DROP PROCEDURE migrar_motor
+GO
+
+CREATE PROCEDURE migrar_motor 
+AS
+BEGIN
+INSERT INTO motor
+(motor_nro_serie, motor_modelo)
+SELECT TELE_MOTOR_NRO_SERIE, TELE_MOTOR_MODELO
+FROM gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_freno')
+	DROP PROCEDURE migrar_freno
+GO
+
+CREATE PROCEDURE migrar_freno 
+AS
+BEGIN
+INSERT INTO freno
+(freno_nro_serie, freno_tamanio_pastilla)
+select TELE_FRENO1_NRO_SERIE,TELE_FRENO1_TAMANIO_DISCO /*FRENO 1*/
+from gd_esquema.Maestra
+UNION
+select TELE_FRENO2_NRO_SERIE,TELE_FRENO2_TAMANIO_DISCO /*FRENO 2*/
+from gd_esquema.Maestra
+UNION
+select TELE_FRENO3_NRO_SERIE,TELE_FRENO3_TAMANIO_DISCO /*FRENO 3*/
+from gd_esquema.Maestra
+UNION
+select TELE_FRENO4_NRO_SERIE,TELE_FRENO4_TAMANIO_DISCO /*FRENO 4*/
+from gd_esquema.Maestra
+END 
+GO
+
+/*
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_neumatico')
+	DROP PROCEDURE migrar_tipo_neumatico
+GO
+
+CREATE PROCEDURE migrar_tipo_neumatico 
+AS
+BEGIN
+INSERT INTO tipo_neumatico
+(id_tipo_neumatico, descripcion)
+END
+GO
+*/
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_sector')
+	DROP PROCEDURE migrar_tipo_sector
+GO
+
+CREATE PROCEDURE migrar_tipo_sector 
+AS
+BEGIN
+INSERT INTO tipo_sector
+select SECTO_TIPO /*TIPO_SECTOR*/
+from gd_esquema.Maestra
+END
+GO
+
+
+/*
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_sector')
+	DROP PROCEDURE migrar_sector 
+GO
+
+CREATE PROCEDURE migrar_sector 
+CREATE TABLE TELEMETRIA_CARRERA.sector 
+(codigo_sector, circuito_codigo, sector_distancia, id_tipo_sector)
+END
+GO
+*/
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_incidente')
+	DROP PROCEDURE migrar_tipo_incidente
+GO
+
+CREATE PROCEDURE migrar_tipo_incidente 
+AS
+BEGIN
+INSERT INTO tipo_incidente
+select INCIDENTE_TIPO /*TIPO_INCIDENTE*/
+from gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_pais')
+	DROP PROCEDURE migrar_pais
+GO
+
+CREATE PROCEDURE migrar_pais 
+AS
+BEGIN
+INSERT INTO pais
+select CIRCUITO_PAIS /*PAIS*/
+from gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_bandera')
+	DROP PROCEDURE migrar_bandera
+GO
+
+CREATE PROCEDURE migrar_bandera 
+AS
+BEGIN
+INSERT INTO bandera
+select INCIDENTE_BANDERA /*BANDERA*/
+from gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_escuderia')
+	DROP PROCEDURE migrar_escuderia
+GO
+
+CREATE PROCEDURE migrar_escuderia
+AS
+BEGIN
+    INSERT INTO escuderia 
+    (escuderia_nombre, escuderia_nacionalidad)
+	select ESCUDERIA_NOMBRE, ESCUDERIA_NACIONALIDAD /*ESCUDERIA*/
+    from gd_esquema.Maestra
+END
+GO
+
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
+	DROP PROCEDURE migrar_piloto 
+GO
+
+CREATE PROCEDURE migrar_piloto 
+AS
+BEGIN
+    INSERT INTO piloto 
+    (piloto_nombre, piloto_apellido, piloto_nacionalidad, piloto_fecha_nacimiento)
+    select PILOTO_NOMBRE, PILOTO_APELLIDO, PILOTO_NACIONALIDAD, PILOTO_FECHA_NACIMIENTO /*PILOTO*/
+    from gd_esquema.Maestra
+END
+GO
+
 
 
 ------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
 BEGIN TRANSACTION
 BEGIN TRY
 	EXECUTE migrar_nombreTabla
+    EXECUTE migrar_caja
+    EXECUTE migrar_motor 
+    EXECUTE migrar_freno 
+    EXECUTE migrar_tipo_neumatico 
+    EXECUTE migrar_tipo_sector 
+    EXECUTE migrar_tipo_incidente 
+    EXECUTE migrar_pais 
+    EXECUTE migrar_bandera 
+    EXECUTE migrar_escuderia
+    EXECUTE migrar_piloto
     -- ...
 END TRY
 BEGIN CATCH
