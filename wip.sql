@@ -1,3 +1,4 @@
+use GD1C2022
 ------------------- DROP DE TABLAS -------------------
 DROP TABLE TELEMETRIA_CARRERA.TELEMETRIA_CARRERA.carrera;
 DROP TABLE TELEMETRIA_CARRERA.circuito;
@@ -35,7 +36,14 @@ DROP PROCEDURE migrar_pais
 DROP PROCEDURE migrar_bandera 
 DROP PROCEDURE migrar_escuderia
 DROP PROCEDURE migrar_piloto
-
+DROP PROCEDURE migrar_carrera
+DROP PROCEDURE migrar_parada_box
+DROP PROCEDURE migrar_sector
+DROP PROCEDURE migrar_telemetria_caja
+DROP PROCEDURE migrar_telemetria_motor
+DROP PROCEDURE migrar_telemetria_neumatico
+DROP PROCEDURE migrar_telemetria_freno
+DROP PROCEDURE migrar_telemetria_auto
 
 ------------------- DROP DE VISTAS -------------------
 -- DROP VIEW TELEMETRIA_CARRERA.nobre_vista;
