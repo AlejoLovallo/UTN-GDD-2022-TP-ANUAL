@@ -19,15 +19,13 @@
 -- 5. sector ---> check
 -- 6. parada_box --> check
 -- 7. parada_box_x_vehiculo ---> check
--- 8. telemetria_auto ---> |
+-- 8. telemetria_auto ---> check
 -- 9. telemetria_caja
 -- 10. telemetria_motor
 -- 11. telemetria_freno
 -- 12. telemetria_neumatico
 -- 13. incidente
 -- 14. incidente_por_auto
-
-
 
 
 ALTER PROC CREATE_TRANSACTIONAL_TABLES
@@ -199,18 +197,18 @@ BEGIN
     ELSE
         CREATE TABLE telemetria_auto (
             tele_auto_cod INT NOT NULL PRIMARY KEY,
-            vehiculo_numero INT NOT NULL,
-            cod_escuderia INT NOT NULL,
-            codigo_carrera INT NOT NULL,
             tele_fecha smalldatetime NOT NULL,
             tele_auto_numero_vuelta numeric(18,0) NOT NULL,
-            codigo_sector INT NOT NULL,
             tele_auto_distancia_carrera numeric(18,6) NOT NULL,
             tele_auto_distancia_vuelta numeric(18,2) NOT NULL,
             tele_auto_tiempo_vuelta numeric(18,10) NOT NULL,
             tele_auto_posicion numeric(18,0) NOT NULL,
             tele_auto_velocidad numeric(18,2) NOT NULL,
             tele_auto_combustible numeric(18,2) NOT NULL,
+            vehiculo_numero INT NOT NULL,
+            cod_escuderia INT NOT NULL,
+            codigo_carrera INT NOT NULL,
+            codigo_sector INT NOT NULL,
             caja_nro_serie NVARCHAR NOT NULL,
             motor_nro_serie NVARCHAR NOT NULL,
             neumatico_nro_serie NVARCHAR NOT NULL,
@@ -221,5 +219,28 @@ BEGIN
     ADD CONSTRAINT FK_TelemetriaautoAuto
     FOREIGN KEY (vehiculo_numero,cod_escuderia) REFERENCES vehiculo(vehiculo_numero,cod_escuderia);
 
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoCarrera
+    FOREIGN KEY (codigo_carrera) REFERENCES carrera(codigo_carrera);
+
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoSector
+    FOREIGN KEY (codigo_sector) REFERENCES sector(codigo_sector);
+
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoCaja
+    FOREIGN KEY(caja_nro_serie) REFERENCES caja(caja_nro_serie);
+
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoMotor
+    FOREIGN KEY(motor_nro_serie) REFERENCES motor(motor_nro_serie);
+
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoNeumatico
+    FOREIGN KEY(neumatico_nro_serie) REFERENCES neumatico(neumatico_nro_serie);
+
+    ALTER TABLE telemetria_auto
+    ADD CONSTRAINT FK_TelemetriaautoFreno
+    FOREIGN KEY(freno_nro_serie) REFERENCES freno(freno_nro_serie);
 
 END

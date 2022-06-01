@@ -1,18 +1,40 @@
-DROP TABLE escuderia;
-DROP TABLE piloto;
-DROP TABLE vehiculo;
-DROP TABLE tipo_incidente;
-DROP TABLE neumatico;
-DROP TABLE bandera;
-DROP TABLE caja;
-DROP TABLE motor;
-DROP TABLE freno;
-DROP TABLE sector;
-DROP TABLE parada_box_por_vehiculo;
-DROP TABLE parada_box;
-DROP TABLE circuito;
-DROP TABLE pais;
-DROP TABLE carrera;
-DROP TABLE tipo_neumatico;
-DROP TABLE tipo_sector;
-DROP TABLE telemetria_auto;
+-- EXEC CREATE_MASTER_TABLES
+-- EXEC CREATE_TRANSACTIONAL_TABLES
+
+-- DROP TABLE escuderia;
+-- DROP TABLE piloto;
+-- DROP TABLE vehiculo;
+-- DROP TABLE tipo_incidente;
+-- DROP TABLE tipo_sector; 
+-- DROP TABLE tipo_neumatico;
+-- DROP TABLE neumatico;
+-- DROP TABLE pais;
+-- DROP TABLE circuito;
+-- DROP TABLE carrera;
+-- DROP TABLE sector;
+-- DROP TABLE parada_box;
+-- DROP TABLE parada_box_por_vehiculo;
+-- DROP TABLE bandera;
+-- DROP TABLE caja; 
+-- DROP TABLE motor; 
+-- DROP TABLE freno;
+-- DROP TABLE telemetria_auto;
+
+-- DROP TABLE escuderia;
+-- DROP TABLE piloto;
+-- DROP TABLE vehiculo;
+-- DROP TABLE tipo_incidente;
+-- DROP TABLE neumatico;
+-- DROP TABLE bandera;
+-- DROP TABLE caja;
+-- DROP TABLE motor;
+-- DROP TABLE freno;
+-- DROP TABLE sector;
+-- DROP TABLE parada_box_por_vehiculo;
+-- DROP TABLE parada_box;
+-- DROP TABLE circuito;
+-- DROP TABLE pais;
+-- DROP TABLE carrera;
+-- DROP TABLE tipo_neumatico;
+-- DROP TABLE tipo_sector;
+-- DROP TABLE telemetria_auto;
