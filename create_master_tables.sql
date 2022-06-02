@@ -99,8 +99,8 @@ BEGIN
         DROP TABLE bandera
     ELSE
         CREATE TABLE bandera (
-            id_incidente_bandera smallint NOT NULL IDENTITY PRIMARY KEY,
-            descripcion NVARCHAR(255) NOT NULL
+            id_incidente_bandera INT IDENTITY NOT NULL PRIMARY KEY,
+            incidente_bandera NVARCHAR(255) NOT NULL
         );
     
     -- CAJA
@@ -113,7 +113,7 @@ BEGIN
         DROP TABLE caja
     ELSE 
         CREATE TABLE caja (
-            caja_nro_serie INT NOT NULL PRIMARY KEY,
+            caja_nro_serie NVARCHAR NOT NULL PRIMARY KEY,
             caja_modelo NVARCHAR NOT NULL,
             caja_desgaste decimal(18,2) NOT NULL
         );
@@ -128,7 +128,7 @@ BEGIN
         DROP TABLE motor
     ELSE
         CREATE TABLE motor (
-            motor_nro_serie INT NOT NULL PRIMARY KEY,
+            motor_nro_serie NVARCHAR NOT NULL PRIMARY KEY,
             motor_modelo NVARCHAR NOT NULL
         );
     
@@ -142,7 +142,7 @@ BEGIN
         DROP TABLE freno
     ELSE
         CREATE TABLE freno (
-            freno_nro_serie INT NOT NULL PRIMARY KEY,
+            freno_nro_serie NVARCHAR NOT NULL PRIMARY KEY,
             freno_tamanio_pastilla decimal(18,2) NOT NULL
         );
 END
