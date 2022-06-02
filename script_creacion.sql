@@ -97,7 +97,7 @@ BEGIN
         DROP TABLE tipo_sector
     ELSE
         CREATE TABLE tipo_sector (
-            id_tipo_sector smallint  IDENTITY PRIMARY KEY,
+            id_tipo_sector smallint IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
 
@@ -559,7 +559,7 @@ END
 EXEC CREATE_MASTER_TABLES
 EXEC CREATE_TRANSACTIONAL_TABLES
 
-select * from caja
+
 GO
 -- Caja 
 CREATE PROCEDURE migrar_caja
@@ -661,11 +661,12 @@ AS
 BEGIN
 	INSERT INTO tipo_sector
 	(descripcion)
-	select SECTO_TIPO /*TIPO_SECTOR*/
+	select  SECTO_TIPO /*TIPO_SECTOR*/
 	from GD1C2022.gd_esquema.Maestra
 	group by SECTO_TIPO
 END
 GO
+
 
 -- Tipo incidente
 CREATE PROCEDURE migrar_tipo_incidente 
@@ -738,10 +739,11 @@ AS
     BEGIN
         INSERT INTO circuito 
         (circuito_codigo,circuito_nombre,id_pais)
-        SELECT CIRCUITO_CODIGO,CIRCUITO_NOMBRE,CIRCUITO_PAIS
+        SELECT CIRCUITO_CODIGO,CIRCUITO_NOMBRE,p.id_pais
         FROM GD1C2022.gd_esquema.maestra
+		JOIN pais p ON p.nombre = CIRCUITO_PAIS
 		WHERE CIRCUITO_CODIGO IS NOT NULL
-		GROUP BY CIRCUITO_CODIGO,CIRCUITO_NOMBRE,CIRCUITO_PAIS
+		GROUP BY CIRCUITO_CODIGO,CIRCUITO_NOMBRE,p.id_pais
     END
 GO
 
@@ -758,18 +760,19 @@ BEGIN
 END 
 GO
 
+
 -- Sector
 CREATE PROCEDURE migrar_sector
 AS 
 BEGIN 
 	INSERT INTO sector
 	(codigo_sector,circuito_codigo,sector_distancia,id_tipo_sector)
-	SELECT CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,id_tipo_sector
+	SELECT CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,ti.id_tipo_sector
 	FROM GD1C2022.gd_esquema.Maestra
 	JOIN tipo_sector ti ON ti.descripcion = SECTO_TIPO
 	WHERE CODIGO_SECTOR IS NOT NULL
 	AND CIRCUITO_CODIGO IS NOT NULL
-	GROUP BY CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,id_tipo_sector
+	GROUP BY CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,ti.id_tipo_sector
 END 
 GO
 
@@ -950,30 +953,37 @@ AS
         UNION
         SELECT NEUMATICO2_NRO_SERIE_VIEJO,NEUMATICO2_TIPO_VIEJO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO2_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO3_NRO_SERIE_VIEJO,NEUMATICO3_TIPO_VIEJO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO4_NRO_SERIE_VIEJO,NEUMATICO4_TIPO_VIEJO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_TIPO_NUEVO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_TIPO_NUEVO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_TIPO_NUEVO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_TIPO_NUEVO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
 END
 
@@ -1001,10 +1011,34 @@ BEGIN
     FROM GD1C2022.gd_esquema.maestra
 	WHERE AUTO_NUMERO IS NOT NULL
 END 
-
+DROP PROC migrar_Caja
+DROP PROC migrar_Motor
+DROP PROC migrar_Freno
+DROP PROC migrar_Tipo_neumatico
+DROP PROC migrar_Tipo_Sector
+DROP PROC migrar_Tipo_incidente
+DROP PROC migrar_Pais 
+DROP PROC migrar_Bandera
+DROP PROC migrar_Escuderia
+DROP PROC migrar_Piloto
+DROP PROC migrar_Carrera
+DROP PROC migrar_Sector
+DROP PROC migrar_Parada_box
+DROP PROC migrar_Telemetria_caja
+DROP PROC migrar_Telemetria_motor
+DROP PROC migrar_Telemetria_neumatico
+DROP PROC migrar_Telemetria_freno
+DROP PROC migrar_Telemetria_auto
+DROP PROC migrar_Circuito
+DROP PROC migrar_incidente
+DROP PROC migrar_Incidente_por_auto
+DROP PROC migrar_Vehiculo
+DROP PROC migrar_parada_box_por_vehiculo
+DROP PROC migrar_Neumatico
 ------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
 BEGIN TRANSACTION
 BEGIN TRY
+	EXECUTE migrar_neumatico 
     EXECUTE migrar_caja -- OK
     EXECUTE migrar_motor -- OK
     EXECUTE migrar_freno -- OK
@@ -1015,20 +1049,20 @@ BEGIN TRY
     EXECUTE migrar_bandera -- OK
     EXECUTE migrar_escuderia -- OK
     EXECUTE migrar_piloto -- OK
-	EXECUTE migrar_carrera -- Duplicado
-	EXECUTE migrar_parada_box -- Duplicado foreign key
-	EXECUTE migrar_sector -- Duplicado foreign key
+	EXECUTE migrar_circuito -- OK
+	EXECUTE migrar_carrera -- OK
+	EXECUTE migrar_parada_box -- OK
+	EXECUTE migrar_incidente -- OK
+	EXECUTE migrar_sector -- ok
 	EXECUTE migrar_telemetria_caja -- Duplicado foreign key
 	EXECUTE migrar_telemetria_motor -- Duplicado foreign key
 	EXECUTE migrar_telemetria_neumatico -- Duplicado foreign key
 	EXECUTE migrar_telemetria_freno -- Duplicado foreign key
 	EXECUTE migrar_telemetria_auto -- Duplicado primary key
-	EXECUTE migrar_circuito -- Tipo de dato erroneo
-	EXECUTE migrar_incidente -- OK
 	EXECUTE migrar_incidente_por_auto -- No se puede insertar el valor NULL en la columna 'cod_escuderia', tabla 'GRUPO_9800.dbo.incidente_por_auto'. La columna no admite valores NULL. Error de INSERT.
 	EXECUTE migrar_vehiculo -- No se puede insertar el valor NULL en la columna 'cod_escuderia', tabla 'GRUPO_9800.dbo.vehiculo'. La columna no admite valores NULL. Error de INSERT.
 	EXECUTE migrar_parada_box_por_vehiculo -- No se puede insertar el valor NULL en la columna 'cod_parada_box', tabla 'GRUPO_9800.dbo.parada_box_por_vehiculo'. La columna no admite valores NULL. Error de INSERT.
-	EXECUTE migrar_neumatico -- Error de conversión al convertir el valor nvarchar 'Blando' al tipo de datos smallint.
+	-- Error de conversión al convertir el valor nvarchar 'Blando' al tipo de datos smallint.
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
@@ -1149,30 +1183,7 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
 GO
 
 
-DROP PROC migrar_Caja
-DROP PROC migrar_Motor
-DROP PROC migrar_Freno
-DROP PROC migrar_Tipo_neumatico
-DROP PROC migrar_Tipo_Sector
-DROP PROC migrar_Tipo_incidente
-DROP PROC migrar_Pais 
-DROP PROC migrar_Bandera
-DROP PROC migrar_Escuderia
-DROP PROC migrar_Piloto
-DROP PROC migrar_Carrera
-DROP PROC migrar_Sector
-DROP PROC migrar_Parada_box
-DROP PROC migrar_Telemetria_caja
-DROP PROC migrar_Telemetria_motor
-DROP PROC migrar_Telemetria_neumatico
-DROP PROC migrar_Telemetria_freno
-DROP PROC migrar_Telemetria_auto
-DROP PROC migrar_Circuito
-DROP PROC migrar_incidente
-DROP PROC migrar_Incidente_por_auto
-DROP PROC migrar_Vehiculo
-DROP PROC migrar_parada_box_por_vehiculo
-DROP PROC migrar_Neumatico
+
 
 SELECT * FROM CAJA
 SELECT * FROM MOTOR
