@@ -390,7 +390,12 @@ BEGIN TRY
 	EXECUTE migrar_telemetria_neumatico
 	EXECUTE migrar_telemetria_freno
 	EXECUTE migrar_telemetria_auto
-    -- ...
+	EXECUTE migrar_circuito
+	EXECUTE migrar_incidente
+	EXECUTE migrar_incidente_por_auto
+	EXECUTE migrar_auto
+	EXECUTE migrar_neumatico
+    -- //TODO...
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
