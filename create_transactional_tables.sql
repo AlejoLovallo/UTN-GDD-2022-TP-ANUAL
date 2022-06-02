@@ -26,9 +26,9 @@
 -- 12. telemetria_neumatico --> check
 -- 13. incidente ---> check
 -- 14. incidente_por_auto --> check
+ USE [GRUPO_9800]
 
-
-ALTER PROC CREATE_TRANSACTIONAL_TABLES
+CREATE PROC CREATE_TRANSACTIONAL_TABLES
 AS 
 BEGIN 
     -- Neumatico
@@ -408,3 +408,4 @@ BEGIN
     ADD CONSTRAINT FK_IncidenteporautoIncidente
     FOREIGN KEY(cod_incidente) REFERENCES incidente(cod_incidente);    
 END
+
