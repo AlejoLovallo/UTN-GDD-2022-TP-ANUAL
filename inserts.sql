@@ -311,7 +311,7 @@ SELECT INCIDENTE_BANDERA FROM gd_esquema.Maestra WHERE INCIDENTE_BANDERA IS NOT 
 CREATE PROCEDURE migrar_incidente_por_auto
 AS
     BEGIN
-        INSERT INTO indicente_por_auto
+        INSERT INTO incidente_por_auto
         (vehiculo_numero,numero_vuelta)
         SELECT AUTO_NUMERO,INCIDENTE_NUMERO_VUELTA
         FROM gd_esquema.maestra
