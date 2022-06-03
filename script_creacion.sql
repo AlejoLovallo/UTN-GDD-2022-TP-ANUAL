@@ -7,36 +7,11 @@ CREATE DATABASE GRUPO_9800;
 GO
 USE [GRUPO_9800]
 ------------------- CREACION DE TABLAS -------------------
-
-DROP PROC CREATE_MASTER_TABLES
-DROP PROC CREATE_TRANSACTIONAL_TABLES
-
-DROP TABLE incidente_por_auto;
-DROP TABLE incidente;
-DROP TABLE telemetria_neumatico;
-DROP TABLE telemetria_freno;
-DROP TABLE telemetria_motor;
-DROP TABLE telemetria_caja;
-DROP TABLE telemetria_auto;
-DROP TABLE parada_box_por_vehiculo;
-DROP TABLE parada_box;
-DROP TABLE sector;
-DROP TABLE carrera;
-DROP TABLE circuito;
-DROP TABLE vehiculo;
-DROP TABLE neumatico;
-DROP TABLE freno;
-DROP TABLE motor;
-DROP TABLE caja;
-DROP TABLE bandera;
-DROP TABLE pais;
-DROP TABLE tipo_neumatico;
-DROP TABLE tipo_sector;
-DROP TABLE tipo_incidente;
-DROP TABLE piloto;
-DROP TABLE escuderia;
+use [GD1C2022]
 
 USE [GRUPO_9800]
+
+EXEC DROP_ALL 
 
 CREATE PROC CREATE_MASTER_TABLES
 AS
@@ -326,10 +301,10 @@ BEGIN
         DROP TABLE parada_box_por_vehiculo
     ELSE
         CREATE TABLE parada_box_por_vehiculo (
-            cod_parada_box INT,
+            cod_parada_box  INT IDENTITY,
             vehiculo_numero INT,
             cod_escuderia INT,
-            nro_serie_neumatico_viejo NVARCHAR(255),
+            nro_serie_neumatico_viejo NVARCHAR(255)	NULL,
             nro_serie_neumatico_nuevo NVARCHAR(255) NULL,
             PRIMARY KEY (cod_parada_box, vehiculo_numero, cod_escuderia)
         );
@@ -612,8 +587,10 @@ BEGIN
 
 END 
 
--- Tipo neumatico 
+ 
 GO
+
+-- Tipo neumatico
 CREATE PROCEDURE migrar_tipo_neumatico 
 AS
 BEGIN
@@ -928,18 +905,23 @@ AS
     END
 GO
 -- Vehiculo
+-- Problemas con numero de vehiculo y codigo de escuderia
 CREATE PROCEDURE migrar_vehiculo
 AS
 BEGIN
         INSERT INTO vehiculo
-        (vehiculo_numero,vehiculo_modelo)
-        SELECT AUTO_NUMERO, AUTO_MODELO
+        (vehiculo_numero,cod_escuderia,vehiculo_modelo)
+        SELECT AUTO_NUMERO, e.cod_escuderia, AUTO_MODELO
         FROM GD1C2022.gd_esquema.maestra
+		JOIN escuderia e ON e.escuderia_nombre = GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
 		WHERE AUTO_NUMERO IS NOT NULL
-		GROUP BY AUTO_NUMERO, AUTO_MODELO
+		GROUP BY AUTO_NUMERO,cod_escuderia, AUTO_MODELO
 END
 
 GO
+
+select * from escuderia
+SELECT * FROM parada_box
 -- Neumatico
 CREATE PROCEDURE migrar_neumatico --//TODO CHECK
 AS
@@ -951,94 +933,84 @@ AS
 		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL
         UNION
-        SELECT NEUMATICO2_NRO_SERIE_VIEJO,NEUMATICO2_TIPO_VIEJO
+        SELECT NEUMATICO2_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
 		JOIN tipo_neumatico ti ON NEUMATICO2_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_VIEJO IS NOT NULL
         UNION
-        SELECT NEUMATICO3_NRO_SERIE_VIEJO,NEUMATICO3_TIPO_VIEJO
+        SELECT NEUMATICO3_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO3_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_VIEJO IS NOT NULL
         UNION
-        SELECT NEUMATICO4_NRO_SERIE_VIEJO,NEUMATICO4_TIPO_VIEJO
+        SELECT NEUMATICO4_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_VIEJO IS NOT NULL
         UNION
-        SELECT NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_TIPO_NUEVO
+        SELECT NEUMATICO1_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
         UNION
-        SELECT NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_TIPO_NUEVO
+        SELECT NEUMATICO2_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO2_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_NUEVO IS NOT NULL
         UNION
-        SELECT NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_TIPO_NUEVO
+        SELECT NEUMATICO3_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO3_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_NUEVO IS NOT NULL
         UNION
-        SELECT NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_TIPO_NUEVO
+        SELECT NEUMATICO4_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
         FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
+		
 END
-
-
 GO
 --Parada box por vehiculo
 CREATE PROCEDURE migrar_parada_box_por_vehiculo
 AS
-BEGIN
+BEGIN --Problemas con las FK de parada box por vehiculo
 	INSERT INTO parada_box_por_vehiculo
-	(vehiculo_numero,nro_serie_neumatico_viejo,nro_serie_neumatico_nuevo)
-	SELECT AUTO_NUMERO,NEUMATICO1_NRO_SERIE_VIEJO,NEUMATICO1_NRO_SERIE_NUEVO 
-	FROM GD1C2022.gd_esquema.Maestra
+	(cod_parada_box,cod_escuderia,vehiculo_numero,nro_serie_neumatico_nuevo,nro_serie_neumatico_viejo)
+	SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO ,NEUMATICO1_NRO_SERIE_VIEJO
+	FROM GD1C2022.gd_esquema.Maestra	
+	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
 	WHERE AUTO_NUMERO IS NOT NULL
+	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_NRO_SERIE_VIEJO
 	UNION
-    SELECT AUTO_NUMERO,NEUMATICO2_NRO_SERIE_VIEJO,NEUMATICO2_TIPO_NUEVO
-    FROM GD1C2022.gd_esquema.maestra
+    SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO ,NEUMATICO2_NRO_SERIE_VIEJO
+	FROM GD1C2022.gd_esquema.Maestra	
+	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
 	WHERE AUTO_NUMERO IS NOT NULL
+	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
     UNION
-    SELECT AUTO_NUMERO,NEUMATICO3_NRO_SERIE_VIEJO,NEUMATICO3_TIPO_NUEVO
-    FROM GD1C2022.gd_esquema.maestra
+    SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO ,NEUMATICO3_NRO_SERIE_VIEJO
+	FROM GD1C2022.gd_esquema.Maestra	
+	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
 	WHERE AUTO_NUMERO IS NOT NULL
+	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
     UNION
-    SELECT AUTO_NUMERO,NEUMATICO4_NRO_SERIE_VIEJO,NEUMATICO4_TIPO_NUEVO
-    FROM GD1C2022.gd_esquema.maestra
+    SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO ,NEUMATICO4_NRO_SERIE_VIEJO
+	FROM GD1C2022.gd_esquema.Maestra	
+	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
 	WHERE AUTO_NUMERO IS NOT NULL
+	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO
+	
 END 
-DROP PROC migrar_Caja
-DROP PROC migrar_Motor
-DROP PROC migrar_Freno
-DROP PROC migrar_Tipo_neumatico
-DROP PROC migrar_Tipo_Sector
-DROP PROC migrar_Tipo_incidente
-DROP PROC migrar_Pais 
-DROP PROC migrar_Bandera
-DROP PROC migrar_Escuderia
-DROP PROC migrar_Piloto
-DROP PROC migrar_Carrera
-DROP PROC migrar_Sector
-DROP PROC migrar_Parada_box
-DROP PROC migrar_Telemetria_caja
-DROP PROC migrar_Telemetria_motor
-DROP PROC migrar_Telemetria_neumatico
-DROP PROC migrar_Telemetria_freno
-DROP PROC migrar_Telemetria_auto
-DROP PROC migrar_Circuito
-DROP PROC migrar_incidente
-DROP PROC migrar_Incidente_por_auto
-DROP PROC migrar_Vehiculo
-DROP PROC migrar_parada_box_por_vehiculo
-DROP PROC migrar_Neumatico
+
+GO
 ------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
 BEGIN TRANSACTION
 BEGIN TRY
-	EXECUTE migrar_neumatico 
+	EXECUTE migrar_neumatico -- OK 
     EXECUTE migrar_caja -- OK
     EXECUTE migrar_motor -- OK
     EXECUTE migrar_freno -- OK
@@ -1053,16 +1025,16 @@ BEGIN TRY
 	EXECUTE migrar_carrera -- OK
 	EXECUTE migrar_parada_box -- OK
 	EXECUTE migrar_incidente -- OK
-	EXECUTE migrar_sector -- ok
+	EXECUTE migrar_sector -- OK
+	EXECUTE migrar_vehiculo -- OK
 	EXECUTE migrar_telemetria_caja -- Duplicado foreign key
 	EXECUTE migrar_telemetria_motor -- Duplicado foreign key
 	EXECUTE migrar_telemetria_neumatico -- Duplicado foreign key
 	EXECUTE migrar_telemetria_freno -- Duplicado foreign key
 	EXECUTE migrar_telemetria_auto -- Duplicado primary key
 	EXECUTE migrar_incidente_por_auto -- No se puede insertar el valor NULL en la columna 'cod_escuderia', tabla 'GRUPO_9800.dbo.incidente_por_auto'. La columna no admite valores NULL. Error de INSERT.
-	EXECUTE migrar_vehiculo -- No se puede insertar el valor NULL en la columna 'cod_escuderia', tabla 'GRUPO_9800.dbo.vehiculo'. La columna no admite valores NULL. Error de INSERT.
 	EXECUTE migrar_parada_box_por_vehiculo -- No se puede insertar el valor NULL en la columna 'cod_parada_box', tabla 'GRUPO_9800.dbo.parada_box_por_vehiculo'. La columna no admite valores NULL. Error de INSERT.
-	-- Error de conversión al convertir el valor nvarchar 'Blando' al tipo de datos smallint.
+	
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
@@ -1255,5 +1227,62 @@ BEGIN
 	THROW 50002, 'Hubo un error al migrar en una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
 END
    
+   
+CREATE PROC DROP_ALL
+AS
+BEGIN 
+	DROP PROC CREATE_MASTER_TABLES
+	DROP PROC CREATE_TRANSACTIONAL_TABLES
+
+	DROP TABLE incidente_por_auto;
+	DROP TABLE incidente;
+	DROP TABLE telemetria_neumatico;
+	DROP TABLE telemetria_freno;
+	DROP TABLE telemetria_motor;
+	DROP TABLE telemetria_caja;
+	DROP TABLE telemetria_auto;
+	DROP TABLE parada_box_por_vehiculo;
+	DROP TABLE parada_box;
+	DROP TABLE sector;
+	DROP TABLE carrera;
+	DROP TABLE circuito;
+	DROP TABLE vehiculo;
+	DROP TABLE neumatico;
+	DROP TABLE freno;
+	DROP TABLE motor;
+	DROP TABLE caja;
+	DROP TABLE bandera;
+	DROP TABLE pais;
+	DROP TABLE tipo_neumatico;
+	DROP TABLE tipo_sector;
+	DROP TABLE tipo_incidente;
+	DROP TABLE piloto;
+	DROP TABLE escuderia;
+
+	DROP PROC migrar_Caja
+	DROP PROC migrar_Motor
+	DROP PROC migrar_Freno
+	DROP PROC migrar_Tipo_neumatico
+	DROP PROC migrar_Tipo_Sector
+	DROP PROC migrar_Tipo_incidente
+	DROP PROC migrar_Pais 
+	DROP PROC migrar_Bandera
+	DROP PROC migrar_Escuderia
+	DROP PROC migrar_Piloto
+	DROP PROC migrar_Carrera
+	DROP PROC migrar_Sector
+	DROP PROC migrar_Parada_box
+	DROP PROC migrar_Telemetria_caja
+	DROP PROC migrar_Telemetria_motor
+	DROP PROC migrar_Telemetria_neumatico
+	DROP PROC migrar_Telemetria_freno
+	DROP PROC migrar_Telemetria_auto
+	DROP PROC migrar_Circuito
+	DROP PROC migrar_incidente
+	DROP PROC migrar_Incidente_por_auto
+	DROP PROC migrar_Vehiculo
+	DROP PROC migrar_parada_box_por_vehiculo
+	DROP PROC migrar_Neumatico
+END
 
 ------------------- CREO INDICES -------------------
