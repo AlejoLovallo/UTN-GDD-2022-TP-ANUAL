@@ -1298,3 +1298,12 @@ END
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
 	DROP PROCEDURE migrar_piloto 
 GO
+
+CREATE INDEX idx_telemetriaAuto
+ON telemetria_auto(vehiculo_numero,cod_escuderia,codigo_carrera,codigo_sector,circuito_codigo);
+
+CREATE INDEX idx_Vehiculo
+ON vehiculo(cod_escuderia);
+
+CREATE INDEX idx_Sector
+ON carrera(circuito_codigo);
