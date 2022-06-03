@@ -177,7 +177,6 @@ BEGIN
     CREATE TABLE neumatico (
         neumatico_nro_serie NVARCHAR(255) PRIMARY KEY,
         --neumatico_estado NVARCHAR(255) ,
-        neumatico_profundidad decimal(18,2),
         id_tipo_neumatico smallint 
     );
     ALTER TABLE neumatico
@@ -301,21 +300,21 @@ BEGIN
         DROP TABLE parada_box_por_vehiculo
     ELSE
         CREATE TABLE parada_box_por_vehiculo (
+			cod_parada_box_por_vehiculo INT IDENTITY PRIMARY KEY,
             cod_parada_box  INT,
             vehiculo_numero INT,
             cod_escuderia INT,
             nro_serie_neumatico_viejo NVARCHAR(255)	NULL,
             nro_serie_neumatico_nuevo NVARCHAR(255) NULL,
-            PRIMARY KEY (cod_parada_box, vehiculo_numero, cod_escuderia)
         );
 
     ALTER TABLE parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoParadabox
     FOREIGN KEY(cod_parada_box) REFERENCES parada_box(cod_parada_box);
 
-    ALTER TABLE parada_box_por_vehiculo
+    /*ALTER TABLE parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoEscuderia
-    FOREIGN KEY (cod_escuderia) REFERENCES escuderia(cod_escuderia);
+    FOREIGN KEY (cod_escuderia) REFERENCES escuderia(cod_escuderia);*/
 
     ALTER TABLE parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoVehiculo
@@ -459,10 +458,10 @@ BEGIN
     CREATE TABLE telemetria_neumatico (
         tele_auto_cod INT ,
         neumatico_nro_serie NVARCHAR(255) ,
-        tele_neumatico_profundidad numeric(18,6) ,
+        tele_neumatico_profundidad DECIMAL(18,6) ,
         tele_neumatico_posicion NVARCHAR(255) ,
-        tele_neumatico_presion numeric(18,6) ,
-        tele_neumatico_temperatura numeric(18,6) ,
+        tele_neumatico_presion DECIMAL(18,6) ,
+        tele_neumatico_temperatura DECIMAL(18,6) ,
         PRIMARY KEY (tele_auto_cod, neumatico_nro_serie)
     );
 
@@ -518,7 +517,7 @@ BEGIN
         cod_escuderia INT,
         cod_incidente INT,
         id_tipo_incidente smallint,
-        numero_vuelta numeric,
+        numero_vuelta DECIMAL(18,0),
         PRIMARY KEY (vehiculo_numero, cod_escuderia, cod_incidente)
     );
 
@@ -695,9 +694,7 @@ END
 GO
 
 
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
-	DROP PROCEDURE migrar_piloto 
-GO
+
 -- Piloto
 CREATE PROCEDURE migrar_piloto 
 AS
@@ -900,11 +897,13 @@ CREATE PROCEDURE migrar_incidente_por_auto
 AS
     BEGIN
         INSERT INTO incidente_por_auto
-        (vehiculo_numero,numero_vuelta)
-        SELECT AUTO_NUMERO,INCIDENTE_NUMERO_VUELTA
+        (vehiculo_numero,cod_escuderia,cod_incidente,numero_vuelta)
+        SELECT AUTO_NUMERO,cod_escuderia,i.cod_incidente,INCIDENTE_NUMERO_VUELTA
         FROM GD1C2022.gd_esquema.maestra
+		JOIN escuderia e ON e.escuderia_nombre = GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+		JOIN incidente i ON i.codigo_carrera = GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
 		WHERE AUTO_NUMERO IS NOT NULL
-		GROUP BY AUTO_NUMERO, INCIDENTE_NUMERO_VUELTA
+		GROUP BY AUTO_NUMERO,cod_escuderia,i.cod_incidente,INCIDENTE_NUMERO_VUELTA
     END
 GO
 -- Vehiculo
@@ -923,8 +922,6 @@ END
 
 GO
 
-select * from escuderia
-SELECT * FROM parada_box
 -- Neumatico
 CREATE PROCEDURE migrar_neumatico --//TODO CHECK
 AS
@@ -984,28 +981,36 @@ BEGIN --Problemas con las FK de parada box por vehiculo
 	SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO ,NEUMATICO1_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
+	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_NRO_SERIE_VIEJO
 	UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO ,NEUMATICO2_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
+	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO ,NEUMATICO3_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
+	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO ,NEUMATICO4_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
+	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO	
 END 
@@ -1014,7 +1019,7 @@ GO
 ------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
 BEGIN TRANSACTION
 BEGIN TRY
-	EXECUTE migrar_neumatico -- OK 
+	
     EXECUTE migrar_caja -- OK
     EXECUTE migrar_motor -- OK
     EXECUTE migrar_freno -- OK
@@ -1025,20 +1030,22 @@ BEGIN TRY
     EXECUTE migrar_bandera -- OK
     EXECUTE migrar_escuderia -- OK
     EXECUTE migrar_piloto -- OK
+	EXECUTE migrar_neumatico -- OK 
 	EXECUTE migrar_circuito -- OK
 	EXECUTE migrar_carrera -- OK
 	EXECUTE migrar_parada_box -- OK
 	EXECUTE migrar_incidente -- OK
 	EXECUTE migrar_sector -- OK
 	EXECUTE migrar_vehiculo -- OK
-	EXECUTE migrar_telemetria_caja -- Duplicado foreign key
-	EXECUTE migrar_telemetria_motor -- Duplicado foreign key
+	EXECUTE migrar_telemetria_auto -- OK
+	EXECUTE migrar_telemetria_caja -- OK
+	EXECUTE migrar_telemetria_motor -- OK
+	EXECUTE migrar_telemetria_freno -- OK
+	EXECUTE migrar_parada_box_por_vehiculo -- OK
 	EXECUTE migrar_telemetria_neumatico -- Duplicado foreign key
-	EXECUTE migrar_telemetria_freno -- Duplicado foreign key
-	EXECUTE migrar_telemetria_auto -- Duplicado primary key
 	EXECUTE migrar_incidente_por_auto -- No se puede insertar el valor NULL en la columna 'cod_escuderia', tabla 'GRUPO_9800.dbo.incidente_por_auto'. La columna no admite valores NULL. Error de INSERT.
-	EXECUTE migrar_parada_box_por_vehiculo -- No se puede insertar el valor NULL en la columna 'cod_parada_box', tabla 'GRUPO_9800.dbo.parada_box_por_vehiculo'. La columna no admite valores NULL. Error de INSERT.
-	
+	-- No se puede insertar el valor NULL en la columna 'cod_parada_box', tabla 'GRUPO_9800.dbo.parada_box_por_vehiculo'. La columna no admite valores NULL. Error de INSERT.
+
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
@@ -1288,3 +1295,6 @@ BEGIN
 END
 
 ------------------- CREO INDICES -------------------
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
+	DROP PROCEDURE migrar_piloto 
+GO
