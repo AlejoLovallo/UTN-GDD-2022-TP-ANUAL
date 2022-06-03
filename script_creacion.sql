@@ -301,7 +301,7 @@ BEGIN
         DROP TABLE parada_box_por_vehiculo
     ELSE
         CREATE TABLE parada_box_por_vehiculo (
-            cod_parada_box  INT IDENTITY,
+            cod_parada_box  INT,
             vehiculo_numero INT,
             cod_escuderia INT,
             nro_serie_neumatico_viejo NVARCHAR(255)	NULL,
@@ -514,11 +514,11 @@ BEGIN
         DROP TABLE incidente_por_auto
     ELSE    
     CREATE TABLE incidente_por_auto (
-        vehiculo_numero INT ,
-        cod_escuderia INT ,
-        cod_incidente INT ,
-        id_tipo_incidente smallint ,
-        numero_vuelta numeric ,
+        vehiculo_numero INT,
+        cod_escuderia INT,
+        cod_incidente INT,
+        id_tipo_incidente smallint,
+        numero_vuelta numeric,
         PRIMARY KEY (vehiculo_numero, cod_escuderia, cod_incidente)
     );
 
@@ -694,6 +694,10 @@ BEGIN
 END
 GO
 
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
+	DROP PROCEDURE migrar_piloto 
+GO
 -- Piloto
 CREATE PROCEDURE migrar_piloto 
 AS
@@ -762,7 +766,6 @@ BEGIN
 	SELECT  PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
 	FROM GD1C2022.gd_esquema.Maestra
 	GROUP BY PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
-	-- Ver si hay que meterle un group by.
 END 
 
 ----------------------------
@@ -970,6 +973,8 @@ AS
 		
 END
 GO
+
+
 --Parada box por vehiculo
 CREATE PROCEDURE migrar_parada_box_por_vehiculo
 AS
@@ -979,31 +984,30 @@ BEGIN --Problemas con las FK de parada box por vehiculo
 	SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO ,NEUMATICO1_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_NRO_SERIE_VIEJO
 	UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO ,NEUMATICO2_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO ,NEUMATICO3_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO ,NEUMATICO4_NRO_SERIE_VIEJO
 	FROM GD1C2022.gd_esquema.Maestra	
 	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON p.codigo_carrera =  GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
+	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
-	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO
-	
+	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO	
 END 
 
 GO
@@ -1150,9 +1154,7 @@ GO
 
 
 
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
-	DROP PROCEDURE migrar_piloto 
-GO
+
 
 
 
