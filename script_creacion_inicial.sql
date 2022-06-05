@@ -1,16 +1,10 @@
 USE [GD1C2022]
 GO
-------------------- CREO BASE DE DATOS -------------------
--- DROP DATABASE TELEMETRIA_CARRERA;
+
 CREATE DATABASE GRUPO_9800;
 GO
-------------------- CREACION DE TABLAS -------------------
-USE [GD1C2022]
 
 USE [GRUPO_9800]
-GO
-EXEC DROP_ALL 
-
 GO
 
 IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = 'CREATE_MASTER_TABLES') 
@@ -1136,7 +1130,6 @@ END
 
 GO
 
-
 ------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
 BEGIN TRANSACTION
 BEGIN TRY
@@ -1164,167 +1157,15 @@ BEGIN TRY
 	EXECUTE migrar_telemetria_freno -- OK
 	EXECUTE migrar_parada_box_por_vehiculo -- OK
 	EXECUTE migrar_incidente_por_auto -- OK
-	EXECUTE migrar_telemetria_neumatico -- Duplicado foreign key
+	EXECUTE migrar_telemetria_neumatico -- OK
 
-	/*Msg 547, Level 16, State 0, Procedure migrar_telemetria_neumatico, Line 5
-Instrucción INSERT en conflicto con la restricción FOREIGN KEY "FK_TelemetrianeumaticoNeumatico". El conflicto ha aparecido en la base de datos "GRUPO_9800", tabla "dbo.neumatico", column 'neumatico_nro_serie'.*/
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
-	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vacías o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
 END CATCH
 
-BEGIN
-	PRINT 'Migracion Exitosa';
-	COMMIT TRANSACTION;
-END
-ELSE
-BEGIN
-    ROLLBACK TRANSACTION;
-	THROW 50002, 'Hubo un error al migrar en una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
-END
-   
-
-------------------- CREACION DE VISTAS -------------------
-/*
-IF EXISTS (SELECT [name] FROM sys.objects WHERE [name] = 'v_nombre')
-DROP VIEW TELEMETRIA_CARRERA.v_nombre
-GO
-CREATE VIEW TELEMETRIA_CARRERA.v_nombre AS
-	SELECT 
-	FROM 
-GO
-*/
-
-
-------------------- CREACION DE STORED PROCEDURES PARA MIGRACION -------------------
-/*
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_nombreTabla')
-	DROP PROCEDURE migrar_nombreTabla
-GO
-
-CREATE PROCEDURE migrar_nombreTabla
-AS
-BEGIN
-    INSERT INTO 
-	SELECT DISTINCT 
-	FROM gd_esquema.Maestra
-  END
-GO
-*/
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_caja')
-	DROP PROCEDURE migrar_caja
-GO
-
-
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_motor')
-	DROP PROCEDURE migrar_motor
-GO
-
-
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_freno')
-	DROP PROCEDURE migrar_freno
-GO
-
-
-/*
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_neumatico')
-	DROP PROCEDURE migrar_tipo_neumatico
-GO
-
-CREATE PROCEDURE migrar_tipo_neumatico 
-AS
-BEGIN
-INSERT INTO tipo_neumatico
-(id_tipo_neumatico, descripcion)
-END
-GO
-*/
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_sector')
-	DROP PROCEDURE migrar_tipo_sector
-GO
-
-
-
-/*
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_sector')
-	DROP PROCEDURE migrar_sector 
-GO
-
-CREATE PROCEDURE migrar_sector 
-CREATE TABLE TELEMETRIA_CARRERA.sector 
-(codigo_sector, circuito_codigo, sector_distancia, id_tipo_sector)
-END
-GO
-*/
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_incidente')
-	DROP PROCEDURE migrar_tipo_incidente
-GO
-
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_pais')
-	DROP PROCEDURE migrar_pais
-GO
-
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_bandera')
-	DROP PROCEDURE migrar_bandera
-GO
-
-
-
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_escuderia')
-	DROP PROCEDURE migrar_escuderia
-GO
-
-
-
-
-
-
-
-
-SELECT * FROM CAJA
-SELECT * FROM MOTOR
-------------------- EJECUCION DE STORED PROCEDURES: MIGRACION -------------------
-BEGIN TRANSACTION
-BEGIN TRY
-
-    EXECUTE migrar_caja
-    EXECUTE migrar_motor 
-    EXECUTE migrar_freno 
-    EXECUTE migrar_tipo_neumatico 
-    EXECUTE migrar_tipo_sector 
-    EXECUTE migrar_tipo_incidente 
-    EXECUTE migrar_pais 
-    EXECUTE migrar_bandera 
-    EXECUTE migrar_escuderia
-    EXECUTE migrar_piloto
-	EXECUTE migrar_carrera
-	EXECUTE migrar_parada_box
-	EXECUTE migrar_sector
-	EXECUTE migrar_telemetria_caja
-	EXECUTE migrar_telemetria_motor
-	EXECUTE migrar_telemetria_neumatico
-	EXECUTE migrar_telemetria_freno
-	EXECUTE migrar_telemetria_auto
-	EXECUTE migrar_Circuito
-	EXECUTE migrar_incidente
-	EXECUTE migrar_Incidente_por_auto
-	EXECUTE migrar_Vehiculo
-	EXECUTE migrar_parada_box_por_vehiculo
-	EXECUTE migrar_Neumatico
-END TRY
-BEGIN CATCH
-    ROLLBACK TRANSACTION;
-	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vacías o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
-END CATCH
-
-IF (EXISTS (SELECT 1 FROM GRUPO_9800.carrera)
+IF (	EXISTS (SELECT 1 FROM GRUPO_9800.carrera)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.circuito)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.sector)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.incidente)
@@ -1358,65 +1199,3 @@ BEGIN
 	THROW 50002, 'Hubo un error al migrar en una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
 END
    
-   
-CREATE PROC DROP_ALL
-AS
-BEGIN 
-	DROP PROC CREATE_MASTER_TABLES
-	DROP PROC CREATE_TRANSACTIONAL_TABLES
-
-	DROP TABLE incidente_por_auto;
-	DROP TABLE incidente;
-	DROP TABLE telemetria_neumatico;
-	DROP TABLE telemetria_freno;
-	DROP TABLE telemetria_motor;
-	DROP TABLE telemetria_caja;
-	DROP TABLE telemetria_auto;
-	DROP TABLE parada_box_por_vehiculo;
-	DROP TABLE parada_box;
-	DROP TABLE sector;
-	DROP TABLE carrera;
-	DROP TABLE circuito;
-	DROP TABLE vehiculo;
-	DROP TABLE neumatico;
-	DROP TABLE freno;
-	DROP TABLE motor;
-	DROP TABLE caja;
-	DROP TABLE bandera;
-	DROP TABLE pais;
-	DROP TABLE tipo_neumatico;
-	DROP TABLE tipo_sector;
-	DROP TABLE tipo_incidente;
-	DROP TABLE piloto;
-	DROP TABLE escuderia;
-
-	DROP PROC migrar_Caja
-	DROP PROC migrar_Motor
-	DROP PROC migrar_Freno
-	DROP PROC migrar_Tipo_neumatico
-	DROP PROC migrar_Tipo_Sector
-	DROP PROC migrar_Tipo_incidente
-	DROP PROC migrar_Pais 
-	DROP PROC migrar_Bandera
-	DROP PROC migrar_Escuderia
-	DROP PROC migrar_Piloto
-	DROP PROC migrar_Carrera
-	DROP PROC migrar_Sector
-	DROP PROC migrar_Parada_box
-	DROP PROC migrar_Telemetria_caja
-	DROP PROC migrar_Telemetria_motor
-	DROP PROC migrar_Telemetria_neumatico
-	DROP PROC migrar_Telemetria_freno
-	DROP PROC migrar_Telemetria_auto
-	DROP PROC migrar_Circuito
-	DROP PROC migrar_incidente
-	DROP PROC migrar_Incidente_por_auto
-	DROP PROC migrar_Vehiculo
-	DROP PROC migrar_parada_box_por_vehiculo
-	DROP PROC migrar_Neumatico
-END
-
-------------------- CREO INDICES -------------------
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_piloto ')
-	DROP PROCEDURE migrar_piloto 
-GO
