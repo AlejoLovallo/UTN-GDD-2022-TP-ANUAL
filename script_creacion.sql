@@ -1164,7 +1164,7 @@ BEGIN TRY
 	EXECUTE migrar_telemetria_freno -- OK
 	EXECUTE migrar_parada_box_por_vehiculo -- OK
 	EXECUTE migrar_incidente_por_auto -- OK
-	EXECUTE migrar_telemetria_neumatico -- Duplicado foreign key
+	EXECUTE migrar_telemetria_neumatico -- OK
 
 	/*Msg 547, Level 16, State 0, Procedure migrar_telemetria_neumatico, Line 5
 Instrucción INSERT en conflicto con la restricción FOREIGN KEY "FK_TelemetrianeumaticoNeumatico". El conflicto ha aparecido en la base de datos "GRUPO_9800", tabla "dbo.neumatico", column 'neumatico_nro_serie'.*/

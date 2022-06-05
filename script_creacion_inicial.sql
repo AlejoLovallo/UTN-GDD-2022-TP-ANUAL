@@ -17,9 +17,9 @@ BEGIN
              AND
                    type='U'
      )   
-        DROP TABLE escuderia
+        DROP TABLE GRUPO_9800.escuderia
      ELSE
-        CREATE TABLE escuderia (
+        CREATE TABLE GRUPO_9800.escuderia (
             cod_escuderia INT IDENTITY PRIMARY KEY,
             escuderia_nombre NVARCHAR(255) ,
             escuderia_nacionalidad NVARCHAR(255) 
@@ -32,9 +32,9 @@ BEGIN
              AND
                    type='U'
      )   
-        DROP TABLE piloto
+        DROP TABLE GRUPO_9800.piloto
     ELSE
-        CREATE TABLE piloto (
+        CREATE TABLE GRUPO_9800.piloto (
             cod_piloto INT  IDENTITY PRIMARY KEY,
             piloto_nombre NVARCHAR(50) ,
             piloto_apellido NVARCHAR(50) ,
@@ -49,9 +49,9 @@ BEGIN
              AND
                    type='U'
      )   
-        DROP TABLE tipo_incidente
+        DROP TABLE GRUPO_9800.tipo_incidente
     ELSE
-        CREATE TABLE tipo_incidente (
+        CREATE TABLE GRUPO_9800.tipo_incidente (
             id_tipo_incidente SMALLINT  IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
@@ -63,9 +63,9 @@ BEGIN
              AND
                    type='U'
      )  
-        DROP TABLE tipo_sector
+        DROP TABLE GRUPO_9800.tipo_sector
     ELSE
-        CREATE TABLE tipo_sector (
+        CREATE TABLE GRUPO_9800.tipo_sector (
             id_tipo_sector smallint IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
@@ -77,9 +77,9 @@ BEGIN
              AND
                    type='U'
      )  
-        DROP TABLE tipo_neumatico
+        DROP TABLE GRUPO_9800.tipo_neumatico
     ELSE
-        CREATE TABLE tipo_neumatico (
+        CREATE TABLE GRUPO_9800.tipo_neumatico (
             id_tipo_neumatico smallint IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
@@ -91,9 +91,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE pais
+        DROP TABLE GRUPO_9800.pais
     ELSE   
-        CREATE TABLE pais (
+        CREATE TABLE GRUPO_9800.pais (
             id_pais smallint  IDENTITY PRIMARY KEY,
             nombre NVARCHAR(50) 
         );
@@ -107,7 +107,7 @@ BEGIN
     )
         DROP TABLE bandera
     ELSE
-        CREATE TABLE bandera (
+        CREATE TABLE GRUPO_9800.bandera (
             id_incidente_bandera INT IDENTITY  PRIMARY KEY,
             incidente_bandera NVARCHAR(255) 
         );
@@ -119,9 +119,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE caja
+        DROP TABLE GRUPO_9800.caja
     ELSE 
-        CREATE TABLE caja (
+        CREATE TABLE GRUPO_9800.caja (
             caja_nro_serie NVARCHAR(255) PRIMARY KEY,
             caja_modelo NVARCHAR(50) ,
         );
@@ -133,9 +133,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE motor
+        DROP TABLE GRUPO_9800.motor
     ELSE
-        CREATE TABLE motor (
+        CREATE TABLE GRUPO_9800.motor (
             motor_nro_serie NVARCHAR(255) PRIMARY KEY,
             motor_modelo NVARCHAR(50) 
         );
@@ -147,9 +147,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE freno
+        DROP TABLE GRUPO_9800.freno
     ELSE
-        CREATE TABLE freno (
+        CREATE TABLE GRUPO_9800.freno (
             freno_nro_serie NVARCHAR(255) PRIMARY KEY,
             freno_tamanio_pastilla decimal(18,2) 
         );
@@ -171,15 +171,15 @@ BEGIN
              AND
                    type='U'
      )   
-        DROP TABLE neumatico
+        DROP TABLE GRUPO_9800.neumatico
      ELSE
-    CREATE TABLE neumatico (
+    CREATE TABLE GRUPO_9800.neumatico (
         neumatico_nro_serie NVARCHAR(255) PRIMARY KEY,
         id_tipo_neumatico smallint 
     );
-    ALTER TABLE neumatico
+    ALTER TABLE GRUPO_9800.neumatico
     ADD CONSTRAINT FK_NeumaticoTiponeumatico
-    FOREIGN KEY (id_tipo_neumatico) REFERENCES tipo_neumatico(id_tipo_neumatico);
+    FOREIGN KEY (id_tipo_neumatico) REFERENCES GRUPO_9800.tipo_neumatico(id_tipo_neumatico);
 
     -- Vehiculo
     IF EXISTS (
@@ -188,22 +188,22 @@ BEGIN
              AND
                    type='U'
      )   
-        DROP TABLE vehiculo
+        DROP TABLE GRUPO_9800.vehiculo
     ELSE
-        CREATE TABLE vehiculo (
+        CREATE TABLE GRUPO_9800.vehiculo (
             vehiculo_numero INT,
             vehiculo_modelo NVARCHAR(255),
             cod_escuderia INT ,
             cod_piloto INT ,
             PRIMARY KEY (vehiculo_numero, cod_escuderia)
         );
-    ALTER TABLE vehiculo
+    ALTER TABLE GRUPO_9800.vehiculo
     ADD CONSTRAINT FK_VehiculoEscuderia
-    FOREIGN KEY (cod_escuderia) REFERENCES escuderia(cod_escuderia);
+    FOREIGN KEY (cod_escuderia) REFERENCES GRUPO_9800.escuderia(cod_escuderia);
 
-    ALTER TABLE vehiculo
+    ALTER TABLE GRUPO_9800.vehiculo
     ADD CONSTRAINT FK_vehiculoPiloto
-    FOREIGN KEY (cod_piloto) REFERENCES piloto(cod_piloto);
+    FOREIGN KEY (cod_piloto) REFERENCES GRUPO_9800.piloto(cod_piloto);
 
     -- Circuito
     IF EXISTS (
@@ -212,16 +212,16 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE circuito
+        DROP TABLE GRUPO_9800.circuito
     ELSE
-        CREATE TABLE circuito (
+        CREATE TABLE GRUPO_9800.circuito (
             circuito_codigo INT PRIMARY KEY,
             circuito_nombre NVARCHAR(255)  ,
             id_pais smallint,
         );
-    ALTER TABLE circuito
+    ALTER TABLE GRUPO_9800.circuito
     ADD CONSTRAINT FK_CircuitoPais
-    FOREIGN KEY (id_pais) REFERENCES pais(id_pais);
+    FOREIGN KEY (id_pais) REFERENCES GRUPO_9800.pais(id_pais);
 
     -- Carrera
     IF EXISTS (
@@ -230,9 +230,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE carrera
+        DROP TABLE GRUPO_9800.carrera
     ELSE
-    CREATE TABLE carrera (
+    CREATE TABLE GRUPO_9800.carrera (
         codigo_carrera INT PRIMARY KEY,
         carrera_fecha date,
         carrera_clima varchar(100),
@@ -240,9 +240,9 @@ BEGIN
         carrera_cant_vueltas INT,
         circuito_codigo INT 
     );
-    ALTER TABLE carrera
+    ALTER TABLE GRUPO_9800.carrera
     ADD CONSTRAINT FK_CarreraCircuito
-    FOREIGN KEY (circuito_codigo) REFERENCES circuito(circuito_codigo);
+    FOREIGN KEY (circuito_codigo) REFERENCES GRUPO_9800.circuito(circuito_codigo);
 
     -- Sector
     IF EXISTS (
@@ -251,22 +251,22 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE sector
+        DROP TABLE GRUPO_9800.sector
     ELSE
-        CREATE TABLE sector (
+        CREATE TABLE GRUPO_9800.sector (
             codigo_sector INT,
             sector_distancia numeric(18,2),
             id_tipo_sector smallint,
             circuito_codigo INT,
             PRIMARY KEY (codigo_sector, circuito_codigo)
     );
-    ALTER TABLE sector
+    ALTER TABLE GRUPO_9800.sector
     ADD CONSTRAINT FK_SectorCircuito
-    FOREIGN KEY (circuito_codigo) REFERENCES circuito(circuito_codigo);
+    FOREIGN KEY (circuito_codigo) REFERENCES GRUPO_9800.circuito(circuito_codigo);
 
-    ALTER TABLE sector
+    ALTER TABLE GRUPO_9800.sector
     ADD CONSTRAINT FK_SectorTipoSector
-    FOREIGN KEY (id_tipo_sector) REFERENCES tipo_sector(id_tipo_sector);
+    FOREIGN KEY (id_tipo_sector) REFERENCES GRUPO_9800.tipo_sector(id_tipo_sector);
 
     -- PARADA BOX
     IF EXISTS (
@@ -275,18 +275,18 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE parada_box
+        DROP TABLE GRUPO_9800.parada_box
     ELSE
-        CREATE TABLE parada_box (
+        CREATE TABLE GRUPO_9800.parada_box (
             cod_parada_box INT IDENTITY PRIMARY KEY,
             parada_box_vuelta numeric(18,0),
             parada_box_tiempo numeric(18,2),
             codigo_carrera INT,
     );
 
-    ALTER TABLE parada_box
+    ALTER TABLE GRUPO_9800.parada_box
     ADD CONSTRAINT FK_ParadaboxCarrera
-    FOREIGN KEY(codigo_carrera) REFERENCES carrera(codigo_carrera);
+    FOREIGN KEY(codigo_carrera) REFERENCES GRUPO_9800.carrera(codigo_carrera);
 
     -- PARADA BOX X vehiculo
     IF EXISTS (
@@ -295,9 +295,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE parada_box_por_vehiculo
+        DROP TABLE GRUPO_9800.parada_box_por_vehiculo
     ELSE
-        CREATE TABLE parada_box_por_vehiculo (
+        CREATE TABLE GRUPO_9800.parada_box_por_vehiculo (
 			cod_parada_box_por_vehiculo INT IDENTITY PRIMARY KEY,
             cod_parada_box  INT,
             vehiculo_numero INT,
@@ -306,25 +306,25 @@ BEGIN
             nro_serie_neumatico_nuevo NVARCHAR(255) NULL,
         );
 
-    ALTER TABLE parada_box_por_vehiculo
+    ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoParadabox
-    FOREIGN KEY(cod_parada_box) REFERENCES parada_box(cod_parada_box);
+    FOREIGN KEY(cod_parada_box) REFERENCES GRUPO_9800.parada_box(cod_parada_box);
 
     /*ALTER TABLE parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoEscuderia
     FOREIGN KEY (cod_escuderia) REFERENCES escuderia(cod_escuderia);*/
 
-    ALTER TABLE parada_box_por_vehiculo
+    ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoVehiculo
-    FOREIGN KEY(vehiculo_numero,cod_escuderia) REFERENCES vehiculo(vehiculo_numero,cod_escuderia);
+    FOREIGN KEY(vehiculo_numero,cod_escuderia) REFERENCES GRUPO_9800.vehiculo(vehiculo_numero,cod_escuderia);
 
-	ALTER TABLE parada_box_por_vehiculo
+	ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoNeumaticoViejo
-    FOREIGN KEY(nro_serie_neumatico_viejo) REFERENCES neumatico(neumatico_nro_serie);
+    FOREIGN KEY(nro_serie_neumatico_viejo) REFERENCES GRUPO_9800.neumatico(neumatico_nro_serie);
 
-	ALTER TABLE parada_box_por_vehiculo
+	ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
     ADD CONSTRAINT FK_ParadaboxporvehiculoNeumaticoNuevo
-    FOREIGN KEY(nro_serie_neumatico_nuevo) REFERENCES neumatico(neumatico_nro_serie);
+    FOREIGN KEY(nro_serie_neumatico_nuevo) REFERENCES GRUPO_9800.neumatico(neumatico_nro_serie);
 
     -- TELEMETRIA AUTO
     IF EXISTS (
@@ -333,9 +333,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE telemetria_auto
+        DROP TABLE GRUPO_9800.telemetria_auto
     ELSE
-        CREATE TABLE telemetria_auto (
+        CREATE TABLE GRUPO_9800.telemetria_auto (
             tele_auto_cod INT PRIMARY KEY,
             tele_fecha smalldatetime ,
             tele_auto_numero_vuelta numeric(18,0) ,
@@ -352,17 +352,17 @@ BEGIN
             circuito_codigo INT ,
     );
 
-    ALTER TABLE telemetria_auto
+    ALTER TABLE GRUPO_9800.telemetria_auto
     ADD CONSTRAINT FK_TelemetriaautoAuto
-    FOREIGN KEY (vehiculo_numero,cod_escuderia) REFERENCES vehiculo(vehiculo_numero,cod_escuderia);
+    FOREIGN KEY (vehiculo_numero,cod_escuderia) REFERENCES GRUPO_9800.vehiculo(vehiculo_numero,cod_escuderia);
 
-    ALTER TABLE telemetria_auto
+    ALTER TABLE GRUPO_9800.telemetria_auto
     ADD CONSTRAINT FK_TelemetriaautoCarrera
-    FOREIGN KEY (codigo_carrera) REFERENCES carrera(codigo_carrera);
+    FOREIGN KEY (codigo_carrera) REFERENCES GRUPO_9800.carrera(codigo_carrera);
 
-    ALTER TABLE telemetria_auto
+    ALTER TABLE GRUPO_9800.telemetria_auto
     ADD CONSTRAINT FK_TelemetriaautoSector
-    FOREIGN KEY (codigo_sector,circuito_codigo) REFERENCES sector(codigo_sector,circuito_codigo);
+    FOREIGN KEY (codigo_sector,circuito_codigo) REFERENCES GRUPO_9800.sector(codigo_sector,circuito_codigo);
 
 
     -- TELEMETRIA CAJA
@@ -372,9 +372,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE telemetria_caja
+        DROP TABLE GRUPO_9800.telemetria_caja
     ELSE
-        CREATE TABLE telemetria_caja (
+        CREATE TABLE GRUPO_9800.telemetria_caja (
             tele_auto_cod INT ,
             caja_nro_serie NVARCHAR(255) ,
             tele_caja_temp_aceite numeric(18,2) ,
@@ -383,13 +383,14 @@ BEGIN
             PRIMARY KEY (tele_auto_cod, caja_nro_serie)
     );
 
-    ALTER TABLE telemetria_caja
+    ALTER TABLE GRUPO_9800.telemetria_caja
     ADD CONSTRAINT FK_Telemetriacaja_Telemetriaauto
-    FOREIGN KEY (tele_auto_cod) REFERENCES telemetria_auto(tele_auto_cod);
+    FOREIGN KEY (tele_auto_cod) REFERENCES GRUPO_9800.telemetria_auto(tele_auto_cod);
 
-	ALTER TABLE telemetria_caja
+	ALTER TABLE GRUPO_9800.telemetria_caja
     ADD CONSTRAINT FK_TelemetriacajaCaja
-    FOREIGN KEY(caja_nro_serie) REFERENCES caja(caja_nro_serie);
+    FOREIGN KEY(caja_nro_serie) REFERENCES GRUPO_9800.caja(caja_nro_serie);
+
     -- TELEMETRIA MOTOR
     IF EXISTS (
          SELECT name FROM sysobjects 
@@ -397,9 +398,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE telemetria_motor
+        DROP TABLE GRUPO_9800.telemetria_motor
     ELSE
-        CREATE TABLE telemetria_motor (
+        CREATE TABLE GRUPO_9800.telemetria_motor (
         tele_auto_cod INT ,
         motor_nro_serie NVARCHAR(255) ,
         tele_motor_potencia numeric(18,6) ,
@@ -409,13 +410,13 @@ BEGIN
         PRIMARY KEY (tele_auto_cod, motor_nro_serie)
     );
 
-    ALTER TABLE telemetria_motor
+    ALTER TABLE GRUPO_9800.telemetria_motor
     ADD CONSTRAINT FK_Telemetriamotor_Telemetriaauto
-    FOREIGN KEY (tele_auto_cod) REFERENCES telemetria_auto(tele_auto_cod);
+    FOREIGN KEY (tele_auto_cod) REFERENCES GRUPO_9800.telemetria_auto(tele_auto_cod);
 
-    ALTER TABLE telemetria_motor
+    ALTER TABLE GRUPO_9800.telemetria_motor
     ADD CONSTRAINT FK_TelemetriamotorMotor
-    FOREIGN KEY(motor_nro_serie) REFERENCES motor(motor_nro_serie);
+    FOREIGN KEY(motor_nro_serie) REFERENCES GRUPO_9800.motor(motor_nro_serie);
 
     --- TELEMETRIA FRENO
     IF EXISTS (
@@ -424,9 +425,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE telemetria_freno
+        DROP TABLE GRUPO_9800.telemetria_freno
     ELSE    
-        CREATE TABLE telemetria_freno (
+        CREATE TABLE GRUPO_9800.telemetria_freno (
         tele_auto_cod INT ,
         freno_nro_serie NVARCHAR(255) ,
         tele_freno_grosor_pastilla decimal(18,2) ,
@@ -436,13 +437,13 @@ BEGIN
         PRIMARY KEY (tele_auto_cod, freno_nro_serie)
     );
 
-    ALTER TABLE telemetria_freno
+    ALTER TABLE GRUPO_9800.telemetria_freno
     ADD CONSTRAINT FK_Telemetriafreno_Telemetriaauto
-    FOREIGN KEY(tele_auto_cod) REFERENCES telemetria_auto(tele_auto_cod);
+    FOREIGN KEY(tele_auto_cod) REFERENCES GRUPO_9800.telemetria_auto(tele_auto_cod);
 
-    ALTER TABLE telemetria_freno
+    ALTER TABLE GRUPO_9800.telemetria_freno
     ADD CONSTRAINT FK_TelemetriafrenoFreno
-    FOREIGN KEY(freno_nro_serie) REFERENCES freno(freno_nro_serie);
+    FOREIGN KEY(freno_nro_serie) REFERENCES GRUPO_9800.freno(freno_nro_serie);
 
     -- TELEMETRIA NEUMATICO
     IF EXISTS (
@@ -451,9 +452,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE telemetria_neumatico
+        DROP TABLE GRUPO_9800.telemetria_neumatico
     ELSE  
-    CREATE TABLE telemetria_neumatico (
+    CREATE TABLE GRUPO_9800.telemetria_neumatico (
         tele_auto_cod INT ,
         neumatico_nro_serie NVARCHAR(255), 
         tele_neumatico_profundidad DECIMAL(18,6) ,
@@ -463,9 +464,9 @@ BEGIN
         PRIMARY KEY (tele_auto_cod, neumatico_nro_serie)
     );
 
-    ALTER TABLE telemetria_neumatico
+    ALTER TABLE GRUPO_9800.telemetria_neumatico
     ADD CONSTRAINT FK_Telemetrianeumatico_Telemetriaauto
-    FOREIGN KEY(tele_auto_cod) REFERENCES telemetria_auto(tele_auto_cod);
+    FOREIGN KEY(tele_auto_cod) REFERENCES GRUPO_9800.telemetria_auto(tele_auto_cod);
 
     /*ALTER TABLE telemetria_neumatico
     ADD CONSTRAINT FK_TelemetrianeumaticoNeumatico
@@ -480,7 +481,7 @@ BEGIN
     )
         DROP TABLE incidente
     ELSE    
-        CREATE TABLE incidente (
+        CREATE TABLE GRUPO_9800.incidente (
         cod_incidente INT IDENTITY  PRIMARY KEY,
         codigo_sector INT ,
         circuito_codigo INT ,
@@ -489,17 +490,17 @@ BEGIN
         id_incidente_bandera INT ,
     );
 
-    ALTER TABLE incidente
+    ALTER TABLE GRUPO_9800.incidente
     ADD CONSTRAINT FK_IncidenteSector
-    FOREIGN KEY (codigo_sector,circuito_codigo) REFERENCES sector(codigo_sector,circuito_codigo);
+    FOREIGN KEY (codigo_sector,circuito_codigo) REFERENCES GRUPO_9800.sector(codigo_sector,circuito_codigo);
 
-    ALTER TABLE incidente
+    ALTER TABLE GRUPO_9800.incidente
     ADD CONSTRAINT FK_IncidenteCarrera
-    FOREIGN KEY (codigo_carrera) REFERENCES carrera(codigo_carrera);
+    FOREIGN KEY (codigo_carrera) REFERENCES GRUPO_9800.carrera(codigo_carrera);
 
-    ALTER TABLE incidente
+    ALTER TABLE GRUPO_9800.incidente
     ADD CONSTRAINT FK_IncidenteBandera
-    FOREIGN KEY (id_incidente_bandera) REFERENCES bandera(id_incidente_bandera);
+    FOREIGN KEY (id_incidente_bandera) REFERENCES GRUPO_9800.bandera(id_incidente_bandera);
 
     -- INCIDENTE POR AUTO
     IF EXISTS (
@@ -508,9 +509,9 @@ BEGIN
              AND
                    type='U'
     )
-        DROP TABLE incidente_por_auto
+        DROP TABLE GRUPO_9800.incidente_por_auto
     ELSE    
-    CREATE TABLE incidente_por_auto (
+    CREATE TABLE GRUPO_9800.incidente_por_auto (
         vehiculo_numero INT,
         cod_escuderia INT,
         cod_incidente INT,
@@ -519,13 +520,13 @@ BEGIN
         PRIMARY KEY (vehiculo_numero, cod_escuderia, cod_incidente)
     );
 
-    ALTER TABLE incidente_por_auto
+    ALTER TABLE GRUPO_9800.incidente_por_auto
     ADD CONSTRAINT FK_IncidenteporautoVehiculo
-    FOREIGN KEY (vehiculo_numero,cod_escuderia) REFERENCES vehiculo(vehiculo_numero,cod_escuderia);
+    FOREIGN KEY (vehiculo_numero,cod_escuderia) REFERENCES GRUPO_9800.vehiculo(vehiculo_numero,cod_escuderia);
 
-    ALTER TABLE incidente_por_auto
+    ALTER TABLE GRUPO_9800.incidente_por_auto
     ADD CONSTRAINT FK_IncidenteporautoIncidente
-    FOREIGN KEY(cod_incidente) REFERENCES incidente(cod_incidente);    
+    FOREIGN KEY(cod_incidente) REFERENCES GRUPO_9800.incidente(cod_incidente);    
 END
 GO
 
@@ -542,10 +543,10 @@ GO
 CREATE PROCEDURE migrar_caja
 AS
 BEGIN
-	INSERT INTO caja
+	INSERT INTO GRUPO_9800.caja
 	(caja_nro_serie, caja_modelo)
 	SELECT TELE_CAJA_NRO_SERIE, TELE_CAJA_MODELO
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_CAJA_NRO_SERIE IS NOT NULL
 	GROUP BY TELE_CAJA_NRO_SERIE, TELE_CAJA_MODELO
 END
@@ -559,10 +560,10 @@ GO
 CREATE PROCEDURE migrar_motor 
 AS
 BEGIN
-	INSERT INTO motor
+	INSERT INTO GRUPO_9800.motor
 	(motor_nro_serie, motor_modelo)
 	SELECT DISTINCT TELE_MOTOR_NRO_SERIE, TELE_MOTOR_MODELO
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_MOTOR_NRO_SERIE IS NOT NULL
 	--GROUP BY TELE_MOTOR_NRO_SERIE, TELE_MOTOR_MODELO
 	ORDER BY TELE_MOTOR_NRO_SERIE
@@ -577,22 +578,22 @@ GO
 CREATE PROCEDURE migrar_freno 
 AS
 BEGIN
-	INSERT INTO freno
+	INSERT INTO GRUPO_9800.freno
 	(freno_nro_serie, freno_tamanio_pastilla)
 	select TELE_FRENO1_NRO_SERIE,TELE_FRENO1_TAMANIO_DISCO /*FRENO 1*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_FRENO1_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_FRENO2_NRO_SERIE,TELE_FRENO2_TAMANIO_DISCO /*FRENO 2*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_FRENO2_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_FRENO3_NRO_SERIE,TELE_FRENO3_TAMANIO_DISCO /*FRENO 3*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_FRENO3_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_FRENO4_NRO_SERIE,TELE_FRENO4_TAMANIO_DISCO /*FRENO 4*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_FRENO4_NRO_SERIE IS NOT NULL
 
 END 
@@ -608,31 +609,31 @@ GO
 CREATE PROCEDURE migrar_tipo_neumatico 
 AS
 BEGIN
-	INSERT INTO tipo_neumatico
+	INSERT INTO GRUPO_9800.tipo_neumatico
 	(descripcion)
-	select NEUMATICO1_TIPO_NUEVO /*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO1_TIPO_NUEVO 
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO2_TIPO_NUEVO /*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO2_TIPO_NUEVO 
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO3_TIPO_NUEVO /*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO3_TIPO_NUEVO 
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO4_TIPO_NUEVO /*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO4_TIPO_NUEVO
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO1_TIPO_VIEJO/*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO1_TIPO_VIEJO
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO2_TIPO_VIEJO /*TIPO NEUMATICO*/
-	FROM GD1C2022.gd_esquema.Maestra
+	select NEUMATICO2_TIPO_VIEJO
+	FROM gd_esquema.Maestra
 	UNION 
-	select NEUMATICO3_TIPO_VIEJO/*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO3_TIPO_VIEJO
+	from gd_esquema.Maestra
 	UNION 
-	select NEUMATICO3_TIPO_VIEJO/*TIPO NEUMATICO*/
-	from GD1C2022.gd_esquema.Maestra
+	select NEUMATICO3_TIPO_VIEJO
+	from gd_esquema.Maestra
 	group by 
 	NEUMATICO1_TIPO_NUEVO,
 	NEUMATICO2_TIPO_NUEVO,
@@ -653,10 +654,10 @@ GO
 CREATE PROCEDURE migrar_tipo_sector 
 AS
 BEGIN
-	INSERT INTO tipo_sector
+	INSERT INTO GRUPO_9800.tipo_sector
 	(descripcion)
 	select  SECTO_TIPO /*TIPO_SECTOR*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	group by SECTO_TIPO
 END
 GO
@@ -670,10 +671,10 @@ GO
 CREATE PROCEDURE migrar_tipo_incidente 
 AS
 BEGIN
-	INSERT INTO tipo_incidente
+	INSERT INTO GRUPO_9800.tipo_incidente
 	(descripcion)
 	select INCIDENTE_TIPO /*TIPO_INCIDENTE*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	GROUP BY INCIDENTE_TIPO
 END
 GO
@@ -685,11 +686,11 @@ GO
 
 CREATE PROCEDURE migrar_pais 
 AS
-	BEGIN
-	INSERT INTO pais
+BEGIN
+	INSERT INTO GRUPO_9800.pais
 	(nombre)
-	select CIRCUITO_PAIS /*PAIS*/
-	from GD1C2022.gd_esquema.Maestra
+	select CIRCUITO_PAIS
+	from gd_esquema.Maestra
 	GROUP BY CIRCUITO_PAIS
 END
 GO
@@ -703,10 +704,10 @@ GO
 CREATE PROCEDURE migrar_bandera 
 AS
 BEGIN
-	INSERT INTO bandera
+	INSERT INTO GRUPO_9800.bandera
 	(incidente_bandera)
-	select INCIDENTE_BANDERA /*BANDERA*/
-	from GD1C2022.gd_esquema.Maestra
+	select INCIDENTE_BANDERA 
+	from gd_esquema.Maestra
 	WHERE INCIDENTE_BANDERA IS NOT NULL
 	GROUP BY INCIDENTE_BANDERA
 END
@@ -720,10 +721,10 @@ GO
 CREATE PROCEDURE migrar_escuderia 
 AS
 BEGIN
-    INSERT INTO escuderia 
+    INSERT INTO GRUPO_9800.escuderia
 	(escuderia_nombre, escuderia_nacionalidad)
     select ESCUDERIA_NOMBRE,ESCUDERIA_NACIONALIDAD
-    from GD1C2022.gd_esquema.Maestra
+    from gd_esquema.Maestra
 	GROUP BY ESCUDERIA_NOMBRE,ESCUDERIA_NACIONALIDAD
 END
 GO
@@ -736,10 +737,10 @@ GO
 CREATE PROCEDURE migrar_piloto 
 AS
 BEGIN
-    INSERT INTO piloto 
+    INSERT INTO GRUPO_9800.piloto
     (piloto_nombre, piloto_apellido, piloto_nacionalidad, piloto_fecha_nacimiento)
-    select PILOTO_NOMBRE, PILOTO_APELLIDO, PILOTO_NACIONALIDAD, PILOTO_FECHA_NACIMIENTO /*PILOTO*/
-    from GD1C2022.gd_esquema.Maestra
+    select PILOTO_NOMBRE, PILOTO_APELLIDO, PILOTO_NACIONALIDAD, PILOTO_FECHA_NACIMIENTO 
+    from gd_esquema.Maestra
 	GROUP BY 
 	PILOTO_NOMBRE, 
 	PILOTO_APELLIDO, 
@@ -756,11 +757,11 @@ GO
 CREATE PROCEDURE migrar_circuito
 AS
     BEGIN
-        INSERT INTO circuito 
+        INSERT INTO GRUPO_9800.circuito
         (circuito_codigo,circuito_nombre,id_pais)
         SELECT CIRCUITO_CODIGO,CIRCUITO_NOMBRE,p.id_pais
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN pais p ON p.nombre = CIRCUITO_PAIS
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.pais p ON p.nombre = CIRCUITO_PAIS
 		WHERE CIRCUITO_CODIGO IS NOT NULL
 		GROUP BY CIRCUITO_CODIGO,CIRCUITO_NOMBRE,p.id_pais
     END
@@ -774,10 +775,10 @@ GO
 CREATE PROCEDURE migrar_carrera
 AS 
 BEGIN 
-	INSERT INTO carrera
+	INSERT INTO GRUPO_9800.carrera
 	(codigo_carrera,carrera_fecha,carrera_clima,carrera_cant_vueltas,circuito_codigo)
 	SELECT CODIGO_CARRERA,CARRERA_FECHA,CARRERA_CLIMA,CARRERA_CANT_VUELTAS,CIRCUITO_CODIGO
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE CODIGO_CARRERA IS NOT NULL
 	GROUP BY CODIGO_CARRERA,CARRERA_FECHA,CARRERA_CLIMA,CARRERA_CANT_VUELTAS,CIRCUITO_CODIGO
 END 
@@ -792,11 +793,11 @@ GO
 CREATE PROCEDURE migrar_sector
 AS 
 BEGIN 
-	INSERT INTO sector
+	INSERT INTO GRUPO_9800.sector
 	(codigo_sector,circuito_codigo,sector_distancia,id_tipo_sector)
 	SELECT CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,ti.id_tipo_sector
-	FROM GD1C2022.gd_esquema.Maestra
-	JOIN tipo_sector ti ON ti.descripcion = SECTO_TIPO
+	FROM gd_esquema.Maestra
+	JOIN GRUPO_9800.tipo_sector ti ON ti.descripcion = SECTO_TIPO
 	WHERE CODIGO_SECTOR IS NOT NULL
 	AND CIRCUITO_CODIGO IS NOT NULL
 	GROUP BY CODIGO_SECTOR,CIRCUITO_CODIGO,SECTOR_DISTANCIA,ti.id_tipo_sector
@@ -811,10 +812,10 @@ GO
 CREATE PROCEDURE migrar_parada_box
 AS
 BEGIN 
-	INSERT INTO parada_box
+	INSERT INTO GRUPO_9800.parada_box
 	(parada_box_vuelta,parada_box_tiempo,codigo_carrera)
 	SELECT  PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	GROUP BY PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
 END 
 
@@ -829,9 +830,9 @@ GO
 CREATE PROCEDURE migrar_telemetria_caja
 AS 
 BEGIN
-	INSERT INTO telemetria_caja
+	INSERT INTO GRUPO_9800.telemetria_caja
 	SELECT TELE_AUTO_CODIGO,TELE_CAJA_NRO_SERIE,TELE_CAJA_TEMP_ACEITE,TELE_CAJA_RPM,TELE_CAJA_DESGASTE
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_CAJA_NRO_SERIE IS NOT NULL
 END
@@ -846,10 +847,10 @@ GO
 CREATE PROCEDURE migrar_telemetria_motor
 AS 
 BEGIN
-	INSERT INTO telemetria_motor
+	INSERT INTO GRUPO_9800.telemetria_motor
 	SELECT TELE_AUTO_CODIGO,TELE_MOTOR_NRO_SERIE,TELE_MOTOR_POTENCIA,
 			TELE_MOTOR_TEMP_ACEITE,TELE_MOTOR_TEMP_AGUA,TELE_MOTOR_RPM
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_MOTOR_NRO_SERIE IS NOT NULL
 END
@@ -865,29 +866,29 @@ GO
 CREATE PROCEDURE migrar_telemetria_neumatico
 AS 
 BEGIN
-	INSERT INTO telemetria_neumatico
+	INSERT INTO GRUPO_9800.telemetria_neumatico
 	(tele_auto_cod,neumatico_nro_serie,tele_neumatico_profundidad,tele_neumatico_posicion,tele_neumatico_presion,tele_neumatico_temperatura)
 	SELECT TELE_AUTO_CODIGO,TELE_NEUMATICO1_NRO_SERIE,TELE_NEUMATICO1_PROFUNDIDAD,TELE_NEUMATICO1_POSICION,	
 			TELE_NEUMATICO1_PRESION, TELE_NEUMATICO1_TEMPERATURA /*NEUMATICO*/
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_NEUMATICO1_NRO_SERIE IS NOT NULL
 	UNION
 	SELECT TELE_AUTO_CODIGO,TELE_NEUMATICO2_NRO_SERIE,TELE_NEUMATICO2_PROFUNDIDAD,TELE_NEUMATICO2_POSICION,	
 			TELE_NEUMATICO2_PRESION, TELE_NEUMATICO2_TEMPERATURA /*NEUMATICO 2*/
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_NEUMATICO2_NRO_SERIE IS NOT NULL
 	UNION
 	SELECT TELE_AUTO_CODIGO,TELE_NEUMATICO3_NRO_SERIE,TELE_NEUMATICO3_PROFUNDIDAD,TELE_NEUMATICO3_POSICION,	
 			TELE_NEUMATICO3_PRESION, TELE_NEUMATICO3_TEMPERATURA /*NEUMATICO 3*/
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 		WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_NEUMATICO3_NRO_SERIE IS NOT NULL
 	UNION
 	SELECT TELE_AUTO_CODIGO,TELE_NEUMATICO4_NRO_SERIE,TELE_NEUMATICO4_PROFUNDIDAD,TELE_NEUMATICO4_POSICION,	
 			TELE_NEUMATICO4_PRESION, TELE_NEUMATICO4_TEMPERATURA /*NEUMATICO 4*/
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_NEUMATICO4_NRO_SERIE IS NOT NULL
 END 
@@ -902,35 +903,34 @@ GO
 CREATE PROCEDURE migrar_telemetria_freno
 AS 
 BEGIN
-	INSERT INTO telemetria_freno
+	INSERT INTO GRUPO_9800.telemetria_freno
 	select TELE_AUTO_CODIGO ,TELE_FRENO1_NRO_SERIE,TELE_FRENO1_GROSOR_PASTILLA,TELE_FRENO1_TAMANIO_DISCO,
 			TELE_FRENO1_POSICION,TELE_FRENO1_TEMPERATURA
-	FROM GD1C2022.gd_esquema.Maestra
+	FROM gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_FRENO1_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_AUTO_CODIGO ,TELE_FRENO2_NRO_SERIE,TELE_FRENO2_GROSOR_PASTILLA,TELE_FRENO2_TAMANIO_DISCO,
 			TELE_FRENO2_POSICION,TELE_FRENO2_TEMPERATURA /*FRENO 2*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_FRENO2_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_AUTO_CODIGO ,TELE_FRENO3_NRO_SERIE,TELE_FRENO3_GROSOR_PASTILLA,TELE_FRENO3_TAMANIO_DISCO,
 			TELE_FRENO3_POSICION,TELE_FRENO3_TEMPERATURA /*FRENO 3*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_FRENO3_NRO_SERIE IS NOT NULL
 	UNION
 	select TELE_AUTO_CODIGO ,TELE_FRENO4_NRO_SERIE,TELE_FRENO4_GROSOR_PASTILLA,TELE_FRENO4_TAMANIO_DISCO,
 			TELE_FRENO4_POSICION,TELE_FRENO4_TEMPERATURA /*FRENO 4*/
-	from GD1C2022.gd_esquema.Maestra
+	from gd_esquema.Maestra
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
 	AND TELE_FRENO4_NRO_SERIE IS NOT NULL
 	 
 END
 
 
--- Revisar / Demasiadas filas.
 GO
 
 --Telemetria auto
@@ -942,17 +942,17 @@ CREATE PROCEDURE migrar_telemetria_auto
 AS
 BEGIN 
 
-	INSERT INTO telemetria_auto
+	INSERT INTO GRUPO_9800.telemetria_auto
 	(tele_auto_cod,vehiculo_numero,cod_escuderia,codigo_carrera,tele_fecha,tele_auto_numero_vuelta,codigo_sector,circuito_codigo,
 	tele_auto_distancia_carrera,tele_auto_distancia_vuelta,tele_auto_tiempo_vuelta,tele_auto_posicion,
 	tele_auto_combustible)
-	SELECT TELE_AUTO_CODIGO,AUTO_NUMERO,cod_escuderia,CODIGO_CARRERA,CARRERA_FECHA,TELE_AUTO_NUMERO_VUELTA,CODIGO_SECTOR,CIRCUITO_CODIGO,
+	SELECT TELE_AUTO_CODIGO,AUTO_NUMERO,e.cod_escuderia,CODIGO_CARRERA,CARRERA_FECHA,TELE_AUTO_NUMERO_VUELTA,CODIGO_SECTOR,CIRCUITO_CODIGO,
 			TELE_AUTO_DISTANCIA_CARRERA,TELE_AUTO_DISTANCIA_VUELTA,TELE_AUTO_TIEMPO_VUELTA,TELE_AUTO_POSICION,
 			TELE_AUTO_COMBUSTIBLE
-	FROM GD1C2022.gd_esquema.Maestra
-	JOIN escuderia e ON e.escuderia_nombre = GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE 
+	FROM gd_esquema.Maestra m
+	JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre = m.ESCUDERIA_NOMBRE 
 	WHERE TELE_AUTO_CODIGO IS NOT NULL
-	GROUP BY TELE_AUTO_CODIGO,AUTO_NUMERO,cod_escuderia,CODIGO_CARRERA,CARRERA_FECHA,TELE_AUTO_NUMERO_VUELTA,CODIGO_SECTOR,CIRCUITO_CODIGO,
+	GROUP BY TELE_AUTO_CODIGO,AUTO_NUMERO,e.cod_escuderia,CODIGO_CARRERA,CARRERA_FECHA,TELE_AUTO_NUMERO_VUELTA,CODIGO_SECTOR,CIRCUITO_CODIGO,
 			TELE_AUTO_DISTANCIA_CARRERA,TELE_AUTO_DISTANCIA_VUELTA,TELE_AUTO_TIEMPO_VUELTA,TELE_AUTO_POSICION,
 			TELE_AUTO_COMBUSTIBLE
 END 
@@ -966,11 +966,11 @@ GO
 CREATE PROCEDURE migrar_incidente
 AS
     BEGIN
-        INSERT INTO incidente
+        INSERT INTO GRUPO_9800.incidente
         (codigo_sector,circuito_codigo, codigo_carrera, tiempo_incidente,id_incidente_bandera)
         SELECT CODIGO_SECTOR,CIRCUITO_CODIGO, CODIGO_CARRERA, INCIDENTE_TIEMPO, ti.id_incidente_bandera
-        FROM GD1C2022.gd_esquema.Maestra
-		JOIN bandera ti ON ti.incidente_bandera = GD1C2022.gd_esquema.Maestra.INCIDENTE_BANDERA
+        FROM gd_esquema.Maestra m
+		JOIN GRUPO_9800.bandera ti ON ti.incidente_bandera = m.INCIDENTE_BANDERA
 		WHERE INCIDENTE_TIPO IS NOT NULL
 		GROUP BY CODIGO_SECTOR,CIRCUITO_CODIGO, CODIGO_CARRERA, INCIDENTE_TIEMPO, ti.id_incidente_bandera
     END
@@ -984,19 +984,19 @@ GO
 CREATE PROCEDURE migrar_incidente_por_auto
 AS
     BEGIN
-        INSERT INTO incidente_por_auto
+        INSERT INTO GRUPO_9800.incidente_por_auto
         (vehiculo_numero,cod_escuderia,cod_incidente,id_tipo_incidente,numero_vuelta)
         SELECT AUTO_NUMERO,e.cod_escuderia, i.cod_incidente,ti.id_tipo_incidente,INCIDENTE_NUMERO_VUELTA
-        FROM GD1C2022.gd_esquema.maestra m
-		JOIN escuderia e ON e.escuderia_nombre = m.ESCUDERIA_NOMBRE 
+        FROM gd_esquema.maestra m
+		JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre = m.ESCUDERIA_NOMBRE 
 						AND e.escuderia_nacionalidad = m.ESCUDERIA_NACIONALIDAD
-		JOIN bandera b ON b.incidente_bandera =  m.INCIDENTE_BANDERA
-		JOIN incidente i ON m.INCIDENTE_TIEMPO = i.tiempo_incidente
+		JOIN GRUPO_9800.bandera b ON b.incidente_bandera =  m.INCIDENTE_BANDERA
+		JOIN GRUPO_9800.incidente i ON m.INCIDENTE_TIEMPO = i.tiempo_incidente
 						AND m.CODIGO_CARRERA = i.codigo_carrera 
 						AND m.CIRCUITO_CODIGO = i.circuito_codigo
 						AND m.CODIGO_SECTOR = i.codigo_sector
 						AND i.id_incidente_bandera = b.id_incidente_bandera
-		JOIN tipo_incidente ti ON INCIDENTE_TIPO = ti.descripcion 
+		JOIN GRUPO_9800.tipo_incidente ti ON m.INCIDENTE_TIPO = ti.descripcion 
 		--GROUP BY AUTO_NUMERO,cod_escuderia,i.cod_incidente,ti.id_tipo_incidente,INCIDENTE_NUMERO_VUELTA
     END
 GO
@@ -1009,13 +1009,13 @@ GO
 CREATE PROCEDURE migrar_vehiculo
 AS
 BEGIN
-        INSERT INTO vehiculo
+        INSERT INTO GRUPO_9800.vehiculo
         (vehiculo_numero,cod_escuderia,vehiculo_modelo)
         SELECT AUTO_NUMERO, e.cod_escuderia, AUTO_MODELO
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN escuderia e ON e.escuderia_nombre = GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
+        FROM gd_esquema.maestra m
+		JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre = m.ESCUDERIA_NOMBRE
 		WHERE AUTO_NUMERO IS NOT NULL
-		GROUP BY AUTO_NUMERO,cod_escuderia, AUTO_MODELO
+		GROUP BY AUTO_NUMERO,e.cod_escuderia, AUTO_MODELO
 END
 
 GO
@@ -1028,46 +1028,46 @@ GO
 CREATE PROCEDURE migrar_neumatico 
 AS
     BEGIN
-        INSERT INTO neumatico
+        INSERT INTO GRUPO_9800.neumatico
         (neumatico_nro_serie,id_tipo_neumatico)
         SELECT NEUMATICO1_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_VIEJO = ti.descripcion
+        FROM gd_esquema.maestra m
+		JOIN GRUPO_9800.tipo_neumatico ti ON m.NEUMATICO1_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO2_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO2_TIPO_VIEJO = ti.descripcion
+        FROM gd_esquema.maestra m
+		JOIN GRUPO_9800.tipo_neumatico ti ON m.NEUMATICO2_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO3_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO3_TIPO_VIEJO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO3_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO4_NRO_SERIE_VIEJO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_VIEJO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO4_TIPO_VIEJO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_VIEJO IS NOT NULL
         UNION
         SELECT NEUMATICO1_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO1_TIPO_NUEVO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO1_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO2_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO2_TIPO_NUEVO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO2_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO2_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO3_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO3_TIPO_NUEVO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO3_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO3_NRO_SERIE_NUEVO IS NOT NULL
         UNION
         SELECT NEUMATICO4_NRO_SERIE_NUEVO,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
 END
 GO
@@ -1080,41 +1080,41 @@ GO
 CREATE PROCEDURE migrar_parada_box_por_vehiculo
 AS
 BEGIN 
-	INSERT INTO parada_box_por_vehiculo
+	INSERT INTO GRUPO_9800.parada_box_por_vehiculo
 	(cod_parada_box,cod_escuderia,vehiculo_numero,nro_serie_neumatico_nuevo,nro_serie_neumatico_viejo)
 	SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO ,NEUMATICO1_NRO_SERIE_VIEJO
-	FROM GD1C2022.gd_esquema.Maestra	
-	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA
-	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
-	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	FROM gd_esquema.Maestra	m
+	JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre =  m.ESCUDERIA_NOMBRE
+	JOIN GRUPO_9800.parada_box p ON (p.codigo_carrera= m.CODIGO_CARRERA
+	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
-	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_NRO_SERIE_VIEJO
+	GROUP BY p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO,NEUMATICO1_NRO_SERIE_VIEJO
 	UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO ,NEUMATICO2_NRO_SERIE_VIEJO
-	FROM GD1C2022.gd_esquema.Maestra	
-	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
-	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
-	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	FROM gd_esquema.Maestra	m
+	JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre =  m.ESCUDERIA_NOMBRE
+	JOIN GRUPO_9800.parada_box p ON (p.codigo_carrera= m.CODIGO_CARRERA
+	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO ,NEUMATICO3_NRO_SERIE_VIEJO
-	FROM GD1C2022.gd_esquema.Maestra	
-	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
-	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
-	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	FROM gd_esquema.Maestra	m
+	JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre =  m.ESCUDERIA_NOMBRE
+	JOIN GRUPO_9800.parada_box p ON (p.codigo_carrera= m.CODIGO_CARRERA
+	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO ,NEUMATICO4_NRO_SERIE_VIEJO
-	FROM GD1C2022.gd_esquema.Maestra	
-	JOIN escuderia e ON e.escuderia_nombre =  GD1C2022.gd_esquema.Maestra.ESCUDERIA_NOMBRE
-	JOIN parada_box p ON (p.codigo_carrera=GD1C2022.gd_esquema.Maestra.CODIGO_CARRERA 
-	AND p.parada_box_vuelta=GD1C2022.gd_esquema.Maestra.PARADA_BOX_VUELTA 
-	AND p.parada_box_tiempo=GD1C2022.gd_esquema.Maestra.PARADA_BOX_TIEMPO)
+	FROM gd_esquema.Maestra	m
+	JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre =  m.ESCUDERIA_NOMBRE
+	JOIN GRUPO_9800.parada_box p ON (p.codigo_carrera= m.CODIGO_CARRERA
+	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
+	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
 	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO	
 END 
@@ -1174,7 +1174,7 @@ IF (	EXISTS (SELECT 1 FROM GRUPO_9800.carrera)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.motor)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.freno)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.incidente_por_auto)
-    AND EXISTS (SELECT 1 FROM GRUPO_9800.parada_box_por_auto)
+    AND EXISTS (SELECT 1 FROM GRUPO_9800.parada_box_por_vehiculo)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.tipo_neumatico)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.tipo_sector)
     AND EXISTS (SELECT 1 FROM GRUPO_9800.tipo_incidente)
@@ -1189,38 +1189,105 @@ BEGIN
     ROLLBACK TRANSACTION;
 	THROW 50002, 'Hubo un error al migrar en una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
 END
+
+GO
+
+CREATE INDEX INDEX_PILOTO 
+ON GRUPO_9800.piloto(cod_piloto,piloto_nacionalidad);
+
+CREATE INDEX INDEX_CAJA 
+ON GRUPO_9800.caja(caja_nro_serie,caja_modelo);
+
+CREATE INDEX INDEX_MOTOR 
+ON GRUPO_9800.motor(motor_nro_serie,motor_modelo);
+
+CREATE INDEX INDEX_VEHICULO 
+ON GRUPO_9800.vehiculo(vehiculo_modelo);
+
+CREATE INDEX INDEX_PARADA_BOX
+ON GRUPO_9800.parada_box(codigo_carrera);
+
+CREATE INDEX INDEX_TELE_AUTO
+ON GRUPO_9800.telemetria_auto(vehiculo_numero,cod_escuderia);
+
+CREATE INDEX INDEX_TELE_AUTO_II
+ON GRUPO_9800.telemetria_auto(vehiculo_numero,cod_escuderia,codigo_carrera);
+
+CREATE INDEX INDEX_TELE_AUTO_III
+ON GRUPO_9800.telemetria_auto(codigo_sector,codigo_carrera);
+
+CREATE INDEX INDEX_TELE_AUTO_IV
+ON GRUPO_9800.telemetria_auto(codigo_sector,circuito_codigo);
+
+CREATE INDEX INDEX_TELE_MOTOR
+ON GRUPO_9800.telemetria_motor(tele_motor_potencia);
+
+CREATE INDEX INDEX_TELE_MOTOR_II
+ON GRUPO_9800.telemetria_motor(tele_motor_rpm);
+
+CREATE INDEX INDEX_INCIDENTE
+ON GRUPO_9800.incidente(circuito_codigo,codigo_sector);
+
+CREATE INDEX INDEX_INCIDENTE_II
+ON GRUPO_9800.incidente(codigo_carrera,codigo_sector);
+
+CREATE INDEX INDEX_INCIDENTE_III
+ON GRUPO_9800.incidente(codigo_carrera);
+
+CREATE INDEX INDEX_TIPO_INCIDENTE
+ON GRUPO_9800.incidente_por_auto(id_tipo_incidente);
+
+-------
+/*
+DROP INDEX GRUPO_9800.piloto.INDEX_PILOTO 
+DROP INDEX GRUPO_9800.caja.INDEX_CAJA
+DROP INDEX GRUPO_9800.motor.INDEX_MOTOR
+DROP INDEX GRUPO_9800.vehiculo.INDEX_VEHICULO
+DROP INDEX GRUPO_9800.parada_box.INDEX_PARADA_BOX
+DROP INDEX GRUPO_9800.telemetria_auto.INDEX_TELE_AUTO
+DROP INDEX GRUPO_9800.telemetria_auto.INDEX_TELE_AUTO_II
+DROP INDEX GRUPO_9800.telemetria_auto.INDEX_TELE_AUTO_III
+DROP INDEX GRUPO_9800.telemetria_auto.INDEX_TELE_AUTO_IV
+DROP INDEX GRUPO_9800.telemetria_motor.INDEX_TELE_MOTOR
+DROP INDEX GRUPO_9800.telemetria_motor.INDEX_TELE_MOTOR
+DROP INDEX GRUPO_9800.incidente.INDEX_INCIDENTE
+DROP INDEX GRUPO_9800.incidente.INDEX_INCIDENTE
+DROP INDEX GRUPO_9800.incidente.INDEX_INCIDENTE
+DROP INDEX GRUPO_9800.incidente_por_auto.INDEX_TIPO_INCIDENTE
+
+*/
 /*  
   CREATE PROC DROP_ALL
 AS
 BEGIN 
 	DROP PROC CREATE_MASTER_TABLES
 	DROP PROC CREATE_TRANSACTIONAL_TABLES
+	
+	DROP TABLE GRUPO_9800.incidente_por_auto;
+	DROP TABLE GRUPO_9800.incidente;
+	DROP TABLE GRUPO_9800.telemetria_neumatico;
+	DROP TABLE GRUPO_9800.telemetria_freno;
+	DROP TABLE GRUPO_9800.telemetria_motor;
+	DROP TABLE GRUPO_9800.telemetria_caja;
+	DROP TABLE GRUPO_9800.telemetria_auto;
+	DROP TABLE GRUPO_9800.parada_box_por_vehiculo;
+	DROP TABLE GRUPO_9800.parada_box;
+	DROP TABLE GRUPO_9800.sector;
+	DROP TABLE GRUPO_9800.carrera;
+	DROP TABLE GRUPO_9800.circuito;
+	DROP TABLE GRUPO_9800.vehiculo;
+	DROP TABLE GRUPO_9800.neumatico;
+	DROP TABLE GRUPO_9800.freno;
+	DROP TABLE GRUPO_9800.motor;
+	DROP TABLE GRUPO_9800.caja;
+	DROP TABLE GRUPO_9800.bandera;
+	DROP TABLE GRUPO_9800.pais;
+	DROP TABLE GRUPO_9800.tipo_neumatico;
+	DROP TABLE GRUPO_9800.tipo_sector;
+	DROP TABLE GRUPO_9800.tipo_incidente;
+	DROP TABLE GRUPO_9800.piloto;
+	DROP TABLE GRUPO_9800.escuderia;
 	drop schema GRUPO_9800
-	DROP TABLE incidente_por_auto;
-	DROP TABLE incidente;
-	DROP TABLE telemetria_neumatico;
-	DROP TABLE telemetria_freno;
-	DROP TABLE telemetria_motor;
-	DROP TABLE telemetria_caja;
-	DROP TABLE telemetria_auto;
-	DROP TABLE parada_box_por_vehiculo;
-	DROP TABLE parada_box;
-	DROP TABLE sector;
-	DROP TABLE carrera;
-	DROP TABLE circuito;
-	DROP TABLE vehiculo;
-	DROP TABLE neumatico;
-	DROP TABLE freno;
-	DROP TABLE motor;
-	DROP TABLE caja;
-	DROP TABLE bandera;
-	DROP TABLE pais;
-	DROP TABLE tipo_neumatico;
-	DROP TABLE tipo_sector;
-	DROP TABLE tipo_incidente;
-	DROP TABLE piloto;
-	DROP TABLE escuderia;
-
 	DROP PROC migrar_Caja
 	DROP PROC migrar_Motor
 	DROP PROC migrar_Freno
