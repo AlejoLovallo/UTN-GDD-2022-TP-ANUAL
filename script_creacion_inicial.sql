@@ -1,10 +1,7 @@
 USE [GD1C2022]
 GO
 
-CREATE DATABASE GRUPO_9800;
-GO
-
-USE [GRUPO_9800]
+CREATE SCHEMA GRUPO_9800;
 GO
 
 IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = 'CREATE_MASTER_TABLES') 
@@ -160,7 +157,7 @@ END
 
 GO
 
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = 'CREATE_MASTER_TABLES') 
+IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = 'CREATE_TRANSACTIONAL_TABLES') 
 	DROP PROCEDURE CREATE_TRANSACTIONAL_TABLES
 GO
 
@@ -458,7 +455,7 @@ BEGIN
     ELSE  
     CREATE TABLE telemetria_neumatico (
         tele_auto_cod INT ,
-        neumatico_nro_serie NVARCHAR(255) REFERENCES neumatico, 
+        neumatico_nro_serie NVARCHAR(255), 
         tele_neumatico_profundidad DECIMAL(18,6) ,
         tele_neumatico_posicion NVARCHAR(255) ,
         tele_neumatico_presion DECIMAL(18,6) ,
@@ -534,7 +531,6 @@ GO
 
 EXEC CREATE_MASTER_TABLES
 GO
-
 EXEC CREATE_TRANSACTIONAL_TABLES
 GO
 
@@ -606,7 +602,7 @@ GO
 
 -- Tipo neumatico
 IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_neumatico') 
-	DROP PROCEDURE migra_tipo_neumatico
+	DROP PROCEDURE migrar_tipo_neumatico
 GO
 
 CREATE PROCEDURE migrar_tipo_neumatico 
@@ -1073,11 +1069,6 @@ AS
         FROM GD1C2022.gd_esquema.maestra
 		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
-		UNION 
-		SELECT TELE_NEUMATICO1_NRO_SERIE,ti.id_tipo_neumatico
-        FROM GD1C2022.gd_esquema.maestra
-		JOIN tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
-		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
 END
 GO
 
@@ -1088,7 +1079,7 @@ GO
 
 CREATE PROCEDURE migrar_parada_box_por_vehiculo
 AS
-BEGIN --Problemas con las FK de parada box por vehiculo
+BEGIN 
 	INSERT INTO parada_box_por_vehiculo
 	(cod_parada_box,cod_escuderia,vehiculo_numero,nro_serie_neumatico_nuevo,nro_serie_neumatico_viejo)
 	SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO1_NRO_SERIE_NUEVO ,NEUMATICO1_NRO_SERIE_VIEJO
@@ -1198,4 +1189,60 @@ BEGIN
     ROLLBACK TRANSACTION;
 	THROW 50002, 'Hubo un error al migrar en una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
 END
-   
+/*  
+  CREATE PROC DROP_ALL
+AS
+BEGIN 
+	DROP PROC CREATE_MASTER_TABLES
+	DROP PROC CREATE_TRANSACTIONAL_TABLES
+	drop schema GRUPO_9800
+	DROP TABLE incidente_por_auto;
+	DROP TABLE incidente;
+	DROP TABLE telemetria_neumatico;
+	DROP TABLE telemetria_freno;
+	DROP TABLE telemetria_motor;
+	DROP TABLE telemetria_caja;
+	DROP TABLE telemetria_auto;
+	DROP TABLE parada_box_por_vehiculo;
+	DROP TABLE parada_box;
+	DROP TABLE sector;
+	DROP TABLE carrera;
+	DROP TABLE circuito;
+	DROP TABLE vehiculo;
+	DROP TABLE neumatico;
+	DROP TABLE freno;
+	DROP TABLE motor;
+	DROP TABLE caja;
+	DROP TABLE bandera;
+	DROP TABLE pais;
+	DROP TABLE tipo_neumatico;
+	DROP TABLE tipo_sector;
+	DROP TABLE tipo_incidente;
+	DROP TABLE piloto;
+	DROP TABLE escuderia;
+
+	DROP PROC migrar_Caja
+	DROP PROC migrar_Motor
+	DROP PROC migrar_Freno
+	DROP PROC migrar_Tipo_neumatico
+	DROP PROC migrar_Tipo_Sector
+	DROP PROC migrar_Tipo_incidente
+	DROP PROC migrar_Pais 
+	DROP PROC migrar_Bandera
+	DROP PROC migrar_Escuderia
+	DROP PROC migrar_Piloto
+	DROP PROC migrar_Carrera
+	DROP PROC migrar_Sector
+	DROP PROC migrar_Parada_box
+	DROP PROC migrar_Telemetria_caja
+	DROP PROC migrar_Telemetria_motor
+	DROP PROC migrar_Telemetria_neumatico
+	DROP PROC migrar_Telemetria_freno
+	DROP PROC migrar_Telemetria_auto
+	DROP PROC migrar_Circuito
+	DROP PROC migrar_incidente
+	DROP PROC migrar_Incidente_por_auto
+	DROP PROC migrar_Vehiculo
+	DROP PROC migrar_parada_box_por_vehiculo
+	DROP PROC migrar_Neumatico
+END*/
