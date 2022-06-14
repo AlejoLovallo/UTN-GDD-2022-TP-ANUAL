@@ -8,56 +8,6 @@ AS
 BEGIN 
 	DROP PROC [GRUPO_9800].CREATE_MASTER_TABLES
 	DROP PROC [GRUPO_9800].CREATE_TRANSACTIONAL_TABLES
-	
-	DROP TABLE GRUPO_9800.incidente_por_auto;
-	DROP TABLE GRUPO_9800.incidente;
-	DROP TABLE GRUPO_9800.telemetria_neumatico;
-	DROP TABLE GRUPO_9800.telemetria_freno;
-	DROP TABLE GRUPO_9800.telemetria_motor;
-	DROP TABLE GRUPO_9800.telemetria_caja;
-	DROP TABLE GRUPO_9800.telemetria_auto;
-	DROP TABLE GRUPO_9800.parada_box_por_vehiculo;
-	DROP TABLE GRUPO_9800.parada_box;
-	DROP TABLE GRUPO_9800.sector;
-	DROP TABLE GRUPO_9800.carrera;
-	DROP TABLE GRUPO_9800.circuito;
-	DROP TABLE GRUPO_9800.vehiculo;
-	DROP TABLE GRUPO_9800.neumatico;
-	DROP TABLE GRUPO_9800.freno;
-	DROP TABLE GRUPO_9800.motor;
-	DROP TABLE GRUPO_9800.caja;
-	DROP TABLE GRUPO_9800.bandera;
-	DROP TABLE GRUPO_9800.pais;
-	DROP TABLE GRUPO_9800.tipo_neumatico;
-	DROP TABLE GRUPO_9800.tipo_sector;
-	DROP TABLE GRUPO_9800.tipo_incidente;
-	DROP TABLE GRUPO_9800.piloto;
-	DROP TABLE GRUPO_9800.escuderia;
-	drop schema GRUPO_9800
-	DROP PROC migrar_Caja
-	DROP PROC migrar_Motor
-	DROP PROC migrar_Freno
-	DROP PROC migrar_Tipo_neumatico
-	DROP PROC migrar_Tipo_Sector
-	DROP PROC migrar_Tipo_incidente
-	DROP PROC migrar_Pais 
-	DROP PROC migrar_Bandera
-	DROP PROC migrar_Escuderia
-	DROP PROC migrar_Piloto
-	DROP PROC migrar_Carrera
-	DROP PROC migrar_Sector
-	DROP PROC migrar_Parada_box
-	DROP PROC migrar_Telemetria_caja
-	DROP PROC migrar_Telemetria_motor
-	DROP PROC migrar_Telemetria_neumatico
-	DROP PROC migrar_Telemetria_freno
-	DROP PROC migrar_Telemetria_auto
-	DROP PROC migrar_circuito
-	DROP PROC migrar_incidente
-	DROP PROC migrar_Incidente_por_auto
-	DROP PROC migrar_Vehiculo
-	DROP PROC migrar_parada_box_por_vehiculo
-	DROP PROC migrar_neumatico
 	DROP PROC [GRUPO_9800].migrar_Caja
 	DROP PROC [GRUPO_9800].migrar_Motor
 	DROP PROC [GRUPO_9800].migrar_Freno
@@ -82,15 +32,44 @@ BEGIN
 	DROP PROC [GRUPO_9800].migrar_Vehiculo
 	DROP PROC [GRUPO_9800].migrar_parada_box_por_vehiculo
 	DROP PROC [GRUPO_9800].migrar_neumatico
+	DROP TABLE GRUPO_9800.incidente_por_auto;
+	DROP TABLE GRUPO_9800.incidente;
+	DROP TABLE GRUPO_9800.telemetria_neumatico;
+	DROP TABLE GRUPO_9800.telemetria_freno;
+	DROP TABLE GRUPO_9800.telemetria_motor;
+	DROP TABLE GRUPO_9800.telemetria_caja;
+	DROP TABLE GRUPO_9800.telemetria_auto;
+	DROP TABLE GRUPO_9800.parada_box_por_vehiculo;
+	DROP TABLE GRUPO_9800.parada_box;
+	DROP TABLE GRUPO_9800.sector;
+	DROP TABLE GRUPO_9800.carrera;
+	DROP TABLE GRUPO_9800.circuito;
+	DROP TABLE GRUPO_9800.vehiculo;
+	DROP TABLE GRUPO_9800.neumatico;
+	DROP TABLE GRUPO_9800.freno;
+	DROP TABLE GRUPO_9800.motor;
+	DROP TABLE GRUPO_9800.caja;
+	DROP TABLE GRUPO_9800.bandera;
+	DROP TABLE GRUPO_9800.pais;
+	DROP TABLE GRUPO_9800.tipo_neumatico;
+	DROP TABLE GRUPO_9800.tipo_sector;
+	DROP TABLE GRUPO_9800.tipo_incidente;
+	DROP TABLE GRUPO_9800.piloto;
+	DROP TABLE GRUPO_9800.escuderia;
+	
+	
+	drop schema GRUPO_9800
+
 END
 
 DROP PROC DROP_ALL
 
 EXEC DROP_ALL
 */
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800]CREATE_MASTER_TABLES') 
-	DROP PROCEDURE [GRUPO_9800].CREATE_MASTER_TABLES
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'CREATE_MASTER_TABLES' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.CREATE_MASTER_TABLES
 GO
+
 CREATE PROCEDURE [GRUPO_9800].CREATE_MASTER_TABLES
 AS
 BEGIN
@@ -130,7 +109,7 @@ BEGIN
    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].tipo_neumatico')
         CREATE TABLE GRUPO_9800.tipo_neumatico (
             id_tipo_neumatico smallint IDENTITY PRIMARY KEY,
-            descripcion NVARCHAR(255) 
+            descripcion NVARCHAR(255)
         );
 
     --- PAIS
@@ -171,15 +150,16 @@ END
 
 GO
 
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].CREATE_TRANSACTIONAL_TABLES') 
-	DROP PROCEDURE [GRUPO_9800].CREATE_TRANSACTIONAL_TABLES
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'CREATE_TRANSACTIONAL_TABLES' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.CREATE_TRANSACTIONAL_TABLES
+
 GO
 
 CREATE PROCEDURE [GRUPO_9800].CREATE_TRANSACTIONAL_TABLES
 AS 
 BEGIN 
     -- Neumatico
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].neumatico')
+    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'GRUPO_9800.neumatico')
 	BEGIN
     CREATE TABLE GRUPO_9800.neumatico (
         neumatico_nro_serie NVARCHAR(255) PRIMARY KEY,
@@ -285,9 +265,9 @@ BEGIN
 		ADD CONSTRAINT FK_ParadaboxporvehiculoParadabox
 		FOREIGN KEY(cod_parada_box) REFERENCES GRUPO_9800.parada_box(cod_parada_box);
 
-		/*ALTER TABLE parada_box_por_vehiculo
+		ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
 		ADD CONSTRAINT FK_ParadaboxporvehiculoEscuderia
-		FOREIGN KEY (cod_escuderia) REFERENCES escuderia(cod_escuderia);*/
+		FOREIGN KEY (cod_escuderia) REFERENCES GRUPO_9800.escuderia(cod_escuderia);
 
 		ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
 		ADD CONSTRAINT FK_ParadaboxporvehiculoVehiculo
@@ -471,7 +451,7 @@ EXEC [GRUPO_9800].CREATE_TRANSACTIONAL_TABLES
 GO
 
 -- Caja 
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_caja') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_caja' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_caja
 GO
 
@@ -488,9 +468,10 @@ END
 GO
 
 -- Motor
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_motor') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_motor' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_motor
 GO
+
 
 CREATE PROCEDURE GRUPO_9800.migrar_motor 
 AS
@@ -506,9 +487,10 @@ END
 GO
 
 -- Freno
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_freno') 
-	DROP PROCEDURE migrar_freno
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_freno' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_freno
 GO
+
 
 CREATE PROCEDURE GRUPO_9800.migrar_freno 
 AS
@@ -537,9 +519,10 @@ END
 GO
 
 -- Tipo neumatico
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_tipo_neumatico') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_tipo_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_tipo_neumatico
 GO
+
 
 CREATE PROCEDURE [GRUPO_9800].migrar_tipo_neumatico 
 AS
@@ -548,42 +531,41 @@ BEGIN
 	(descripcion)
 	select NEUMATICO1_TIPO_NUEVO 
 	from gd_esquema.Maestra
+	WHERE NEUMATICO1_TIPO_NUEVO IS NOT NULL
 	UNION 
 	select NEUMATICO2_TIPO_NUEVO 
 	from gd_esquema.Maestra
+	WHERE NEUMATICO2_TIPO_NUEVO IS NOT NULL
 	UNION 
 	select NEUMATICO3_TIPO_NUEVO 
 	from gd_esquema.Maestra
+	WHERE NEUMATICO3_TIPO_NUEVO IS NOT NULL
 	UNION 
 	select NEUMATICO4_TIPO_NUEVO
 	from gd_esquema.Maestra
+	WHERE NEUMATICO4_TIPO_NUEVO IS NOT NULL
 	UNION 
 	select NEUMATICO1_TIPO_VIEJO
 	from gd_esquema.Maestra
+	WHERE NEUMATICO1_TIPO_VIEJO IS NOT NULL
 	UNION 
 	select NEUMATICO2_TIPO_VIEJO
 	FROM gd_esquema.Maestra
+	WHERE NEUMATICO2_TIPO_VIEJO IS NOT NULL
 	UNION 
 	select NEUMATICO3_TIPO_VIEJO
 	from gd_esquema.Maestra
+	WHERE NEUMATICO3_TIPO_VIEJO IS NOT NULL
 	UNION 
-	select NEUMATICO3_TIPO_VIEJO
+	select NEUMATICO4_TIPO_VIEJO
 	from gd_esquema.Maestra
-	group by 
-	NEUMATICO1_TIPO_NUEVO,
-	NEUMATICO2_TIPO_NUEVO,
-	NEUMATICO3_TIPO_NUEVO,
-	NEUMATICO4_TIPO_NUEVO,
-	NEUMATICO1_TIPO_VIEJO,
-	NEUMATICO2_TIPO_VIEJO,
-	NEUMATICO3_TIPO_VIEJO,
-	NEUMATICO3_TIPO_VIEJO
+	WHERE NEUMATICO4_TIPO_VIEJO IS NOT NULL
 END
 GO
 
 -- Tipo Sector
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_tipo_sector') 
-	DROP PROCEDURE [GRUPO_9800].migrar_tipo_sector
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_tipo_sector' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_tipo_sector
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_tipo_sector 
@@ -597,9 +579,8 @@ BEGIN
 END
 GO
 
-
 -- Tipo incidente
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_tipo_incidente') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_tipo_incidente' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_tipo_incidente
 GO
 
@@ -615,10 +596,9 @@ END
 GO
 
 -- Pais 
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_pais') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_pais' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_pais
 GO
-
 CREATE PROCEDURE GRUPO_9800.migrar_pais 
 AS
 BEGIN
@@ -632,11 +612,10 @@ GO
 
 
 -- Bandera
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_bandera') 
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_bandera' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_bandera
 GO
-
-CREATE PROCEDURE [GRUPO_9800].migrar_bandera 
+CREATE PROCEDURE [GRUPO_9800].migrar_bandera
 AS
 BEGIN
 	INSERT INTO GRUPO_9800.bandera
@@ -647,12 +626,11 @@ BEGIN
 	GROUP BY INCIDENTE_BANDERA
 END
 GO
-
--- Escuderia
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_escuderia') 
-	DROP PROCEDURE [GRUPO_9800].migrar_escuderia
+ 
+--Escuderia
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_escuderia' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_escuderia
 GO
-
 CREATE PROCEDURE [GRUPO_9800].migrar_escuderia 
 AS
 BEGIN
@@ -665,8 +643,8 @@ END
 GO
 
 -- Piloto
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_piloto') 
-	DROP PROCEDURE [GRUPO_9800].migrar_piloto
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_piloto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_piloto
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_piloto 
@@ -685,8 +663,8 @@ END
 GO
 
 -- Circuito
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_circuito') 
-	DROP PROCEDURE [GRUPO_9800].migrar_circuito
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_circuito' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_circuito
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_circuito
@@ -703,8 +681,8 @@ AS
 GO
 
 -- Carrera
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_carrera') 
-	DROP PROCEDURE [GRUPO_9800].migrar_carrera
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_carrera' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_carrera
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_carrera
@@ -721,8 +699,8 @@ GO
 
 
 -- Sector
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_sector') 
-	DROP PROCEDURE [GRUPO_9800].migrar_sector
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_sector' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_sector
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_sector
@@ -740,8 +718,8 @@ END
 GO
 
 -- Parada box
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_parada_box') 
-	DROP PROCEDURE [GRUPO_9800].migrar_parada_box
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_parada_box' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_parada_box
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_parada_box
@@ -758,9 +736,10 @@ END
 GO
 
 -- Telemetria caja
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_telemetria_caja') 
-	DROP PROCEDURE [GRUPO_9800].migrar_telemetria_caja
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_telemetria_caja' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_telemetria_caja
 GO
+
 
 CREATE PROCEDURE [GRUPO_9800].migrar_telemetria_caja
 AS 
@@ -775,8 +754,8 @@ END
 GO
 
 -- Telemetria motor
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_telemetria_motor') 
-	DROP PROCEDURE [GRUPO_9800].migrar_telemetria_motor
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_telemetria_motor' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_telemetria_motor
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_telemetria_motor
@@ -794,8 +773,8 @@ GO
 
 
 --Telemetria neumatico
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_telemetria_neumatico') 
-	DROP PROCEDURE [GRUPO_9800].migrar_telemetria_neumatico
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_telemetria_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_telemetria_neumatico
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_telemetria_neumatico
@@ -831,8 +810,8 @@ GO
 
 
 --Telemetria freno
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_telemetria_freno') 
-	DROP PROCEDURE [GRUPO_9800].migrar_telemetria_freno
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_telemetria_freno' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_telemetria_freno
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_telemetria_freno
@@ -869,8 +848,8 @@ END
 GO
 
 --Telemetria auto
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_telemetria_auto') 
-	DROP PROCEDURE [GRUPO_9800].migrar_telemetria_auto
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_telemetria_auto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_telemetria_auto
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_telemetria_auto
@@ -894,9 +873,10 @@ END
 GO
 
 -- Incidente
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_incidente') 
-	DROP PROCEDURE [GRUPO_9800].migrar_incidente
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_incidente' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_incidente
 GO
+
 
 CREATE PROCEDURE [GRUPO_9800].migrar_incidente
 AS
@@ -912,8 +892,8 @@ AS
 GO
 
 -- Incidente por auto
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_incidente_por_auto') 
-	DROP PROCEDURE [GRUPO_9800].migrar_incidente_por_auto
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_incidente_por_auto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_incidente_por_auto
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_incidente_por_auto
@@ -937,8 +917,8 @@ AS
 GO
 
 -- Vehiculo
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_vehiculo') 
-	DROP PROCEDURE [GRUPO_9800].migrar_vehiculo
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_vehiculo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_vehiculo
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_vehiculo
@@ -956,8 +936,8 @@ END
 GO
 
 -- Neumatico
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_neumatico') 
-	DROP PROCEDURE [GRUPO_9800].migrar_neumatico
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_neumatico
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_neumatico 
@@ -1004,12 +984,17 @@ AS
         FROM gd_esquema.maestra
 		JOIN GRUPO_9800.tipo_neumatico ti ON NEUMATICO4_TIPO_NUEVO = ti.descripcion
 		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
+		UNION
+		SELECT TELE_NEUMATICO1_NRO_SERIE,ti.id_tipo_neumatico
+        FROM gd_esquema.maestra
+		JOIN GRUPO_9800.tipo_neumatico ti ON TELE_NEUMATICO1_NRO_SERIE = ti.descripcion
+		WHERE NEUMATICO4_NRO_SERIE_NUEVO IS NOT NULL
 END
 GO
 
 --Parada box por vehiculo
-IF EXISTS (SELECT [name] FROM sys.procedures WHERE [name] = '[GRUPO_9800].migrar_parada_box_por_vehiculo') 
-	DROP PROCEDURE [GRUPO_9800].migrar_parada_box_por_vehiculo
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_parada_box_por_vehiculo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP PROCEDURE GRUPO_9800.migrar_parada_box_por_vehiculo
 GO
 
 CREATE PROCEDURE [GRUPO_9800].migrar_parada_box_por_vehiculo
