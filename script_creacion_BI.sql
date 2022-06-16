@@ -70,3 +70,51 @@ BEGIN
         );
 END
 GO
+
+/*MIGRACIÓN*/
+
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_CIRCUITO /*FALTA*/
+AS
+BEGIN
+    INSERT INTO GRUPO_9800.BI_CIRCUITO (TIPO_SECTOR,TELE_AUTO_COD,NEUMATICO_NRO_SERIE,FRENO_NRO_SERIE,CAJA_NRO_SERIE,MOTOR_NRO_SERIE,
+                                        DESGASTE_NUEVO_NEUMATICO,DESGASTE_VIEJO_NEUMATICO,DESGASTE_NUEVO_FRENO,DESGASTE_VIEJO_FRENO, /*NO SE COMO SACAR EL DESGASTE*/
+                                        POTENCIA_VIEJA_MOTOR,POTENCIA_NUEVA_MOTOR,DESGASTE_VIEJO_CAJA,
+                                        DESGASTE_NUEVO_CAJA,VEHICULO,COD_ESCUDERIA,NUMERO_VUELTA,CIRCUITO_CODIGO,TIEMPO_VUELTA,
+                                        COMBUSTIBLE_CONSUMIDO,VELOCIDAD,SECTOR)
+    SELECT ts.id_tipo_sector, ta.tele_auto_cod, tn.neumatico_nro_serie,tf.freno_nro_serie,tc.caja_nro_serie,tm.motor_nro_serie,
+
+
+    FROM GRUPO_9800.telemetria_auto ta JOIN GRUPO_9800.sector s ON (ta.codigo_sector = s.codigo_sector)
+                                        JOIN GRUPO_9800.tipo_sector ts ON (s.id_tipo_sector = ts.id_tipo_sector)
+                                        JOIN GRUPO_9800.telemetria_neumatico tn ON (ta.tele_auto_cod = tn.tele_auto_cod)
+                                        JOIN GRUPO_9800.telemetria_freno tf ON (ta.tele_auto_cod = tf.tele_auto_cod)
+                                        JOIN GRUPO_9800.telemetria_caja tc ON (ta.tele_auto_cod = tc.tele_auto_cod)
+                                        JOIN GRUPO_9800.telemetria_motor tm ON (ta.tele_auto_cod = tm.tele_auto_cod)
+                                        
+
+END
+    GO
+
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_PARADAS /*LISTO*/
+AS
+BEGIN
+    INSERT INTO GRUPO_9800.BI_PARADAS (COD_ESCUDERIA,CIRCUITO_CODIGO,COD_PARADA_BOX,TIEMPO_PARADA_BOX)
+    SELECT e.cod_escuderia, ci.circuito_codigo, pbv.cod_parada_box,pb.parada_box_tiempo
+    FROM GRUPO_9800.parada_box_por_vehiculo pbv JOIN GRUPO_9800.parada_box pb ON (pbv.cod_parada_box = pb.cod_parada_box)
+                                                JOIN GRUPO_9800.escuderia e ON (pbv.cod_escuderia = e.cod_escuderia)
+                                                JOIN GRUPO_9800.carrera ca ON (pbv.codigo_carrera = ca.codigo_carrera)
+                                                JOIN GRUPO_9800.circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
+END
+    GO
+
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_INCIDENTE /*LISTO*/
+AS
+BEGIN
+    INSERT INTO GRUPO_9800.BI_INCIDENTE (COD_INCIDENTE,ID_TIPO_SECTOR,COD_ESCUDERIA,CIRCUITO_CODIGO)
+    SELECT i.cod_incidente, ts.id_tipo_sector,e.cod_escuderia,i.circuito_codigo
+    FROM GRUPO_9800.incidente i JOIN GRUPO_9800.sector s ON (i.codigo_sector = s.codigo_sector)
+                                JOIN GRUPO_9800.tipo_sector ts ON (s.id_tipo_sector = ts.id_tipo_sector)
+                                JOIN GRUPO_9800.incidente_por_auto ia ON (i.cod_incidente = ia.cod_incidente)
+                                JOIN GRUPO_9800.escuderia e ON (ia.cod_escuderia = e.cod_escuderia)
+END
+    GO
