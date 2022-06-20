@@ -92,8 +92,7 @@ BEGIN
         CREATE TABLE GRUPO_9800.BI_TIEMPO(
             COD_TIEMPO INT IDENTITY PRIMARY KEY,
             ANIO INT not null,
-            MES INT not null,
-            DIA INT not null
+            CUATRIMESTRE INT not null       
         );
     END
     
@@ -156,8 +155,7 @@ BEGIN
 	
 	DECLARE @Date DATETIME
 	DECLARE @ANIO INT
-	DECLARE @Mes INT
-	DECLARE @Dia INT
+	DECLARE @Cuatrimestre INT
 
 	OPEN date_cursor
 	FETCH NEXT FRIOM date_cursor into @Date
@@ -165,11 +163,11 @@ BEGIN
 	WHILE(@@FETCH_STATUS = 0)
 	BEGIN
 			SET @Anio = YEAR(@Date)
-			SET @Mes = MONTH(@Date)
-			SET @Dia = DAY(@Date)
+			SET @Cuatrimestre = CASE WHEN MONTH(@Date) = 1 OR MONTH(@Date) = 2  OR MONTH(@Date) = 3 OR MONTH(@Date) = 4 then 1						 WHEN MONTH(@Date) = 5 OR MONTH(@Date) = 6  OR MONTH(@Date) = 7 OR MONTH(@Date) = 8 then 2						 WHEN MONTH(@Date) = 9 OR MONTH(@Date) = 10 OR MONTH(@Date) = 11 OR MONTH(@Date) = 12 then 3
+						 END
 
-			IF NOT EXISTS (SELECT 1 FROM GRUPO_9800.BI_TIEMPO WHERE (ANIO = @Anio AND MES = @Mes AND DIA = @Dia))
-				INSERT INTO GRUPO_9800.BI_tiempo (ANIO, MES, DIA) VALUES (@Anio, @Mes, @Dia)
+			IF NOT EXISTS (SELECT * FROM GRUPO_9800.BI_TIEMPO WHERE (ANIO = @Anio AND @Cuatrimestre = @Cuatrimestre))
+				INSERT INTO GRUPO_9800.BI_tiempo (ANIO, CUATRIMESTRE) VALUES (@Anio, @Cuatrimestre)
 			
 			FETCH NEXT date_cursor into @Date
 	END
@@ -178,3 +176,91 @@ BEGIN
 	DEALLOCATE date_cursor
 END
 GO
+
+
+/*
+ Los 3 circuitos donde se consume mayor cantidad en tiempo de paradas en 
+boxes. 
+*/
+
+
+SELECT TOP 3 circuito_codigo,SUM(TIEMPO_PARADA_BOX) 'Tiempo consumido por circuito'
+FROM GRUPO_9800.BI_paradas
+GROUP BY circuito_codigo
+ORDER BY MAX(SUM(TIEMPO_PARADA_BOX)) DESC
+
+/*
+Los 3 circuitos más peligrosos del año, en función mayor cantidad de 
+incidentes
+*/
+SELECT TOP 3 circuito_codigo,anio,cantidad_incidentes
+FROM GRUPO_9800.BI_incidente
+JOIN GRUPO_9800.BI_tiempo ON cod_
+GROUP BY circuito_codigo,ANIO
+ORDER BY MAX(cantidad_incidentes) DESC
+
+
+/*
+Promedio de incidentes que presenta cada escudería por año en los 
+distintos tipo de sectores. 
+*/
+
+SELECT AVG(cantidad_incidente) 'Promedio de incidentes',cod_escuderia,anio,id_tipo_sector
+FROM GRUPO_9800.BI_incidente
+GROUP BY cod_escuderia,anio,id_tipo_sector
+
+
+/*
+Cantidad de paradas por circuito por escudería por año.
+*/
+
+SELECT COUNT(cod_parada_box) 'Cantidad de paradas',circuito_codigo,cod_escuderia,anio
+FROM GRUPO_9800.BI_paradas
+GROUP BY circuito_codigo,cod_escuderia,anio
+
+/*
+Tiempo promedio que tardó cada escudería en las paradas por cuatrimestre.
+*/
+
+SELECT AVG(tiempo_parada_box) 'Tiempo promedio en parada de box',cod_escuderia,cuatrimestre
+FROM GRUPO_9800.BI_paradas
+GROUP BY cod_escuderia,cuatrimestre
+
+/*
+Máxima velocidad alcanzada por cada auto en cada tipo de sector de cada 
+circuito.
+*/ 
+
+
+SELECT MAX(velocidad) 'Maxima velocidad alcanzada', cod_auto, id_tipo_sector, cod_circuito
+FROM GRUPO_9800.BI_circuito
+GROUP BY cod_auto,id_tipo_sector,cod_circuito
+
+/*
+Los 3 de circuitos con mayor consumo de combustible promedio
+*/
+
+SELECT TOP 3 cod_circuito, AVG(combustible_consumido)
+FROM GRUPO_9800.BI_circuito
+GROUP BY cod_circuito
+ORDER BY 2 DESC
+
+/*
+ Mejor tiempo de vuelta de cada escudería por circuito por año. 
+El mejor tiempo está dado por el mínimo tiempo en que un auto logra 
+realizar una vuelta de un circuito.
+*/
+
+SELECT MIN(tiempo_vuelta) 'Minimo tiempo de vuelta',cod_escuderia,circuito_codigo,anio
+FROM GRUPO_9800.BI_circuito
+GROUP BY cod_escuderia,circuito_codigo,anio
+
+
+/*
+Desgaste promedio de cada componente de cada auto por vuelta por 
+circuito. 
+Tener en cuenta que, para el cálculo del desgaste de los neumáticos, se 
+toma la diferencia de mm del mismo entre la medición inicial y final de 
+cada vuelta. Lo mismo aplica para el desgaste de frenos. 
+Para el cálculo del desgaste del motor se toma en cuenta la perdida de 
+potencia. */SELECT desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigoFROM GRUPO_9800.BI_circuitoGROUP BY desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigo
