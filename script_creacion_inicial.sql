@@ -66,16 +66,9 @@ DROP PROC DROP_ALL
 
 EXEC DROP_ALL
 */
-/*
-CREATE PROCEDURE MIGRAR_CAJA
-AS
-BEGIN 
-	PRINT 'HOLA'
-END */
 -- Caja 
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'migrar_caja' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP PROCEDURE GRUPO_9800.migrar_caja
-
 GO
 
 -- Motor
@@ -208,6 +201,7 @@ IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P'
 	DROP PROCEDURE GRUPO_9800.migrar_parada_box_por_vehiculo
 GO
 
+-- DROP DE TABLAS
 
 --incidente_por_auto
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'incidente_por_auto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
@@ -352,7 +346,6 @@ CREATE PROCEDURE [GRUPO_9800].CREATE_MASTER_TABLES
 AS
 BEGIN
     -- ESCUDERIA
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].escuderia')
 		CREATE TABLE GRUPO_9800.escuderia (
             cod_escuderia INT IDENTITY PRIMARY KEY,
             escuderia_nombre NVARCHAR(255) ,
@@ -360,7 +353,6 @@ BEGIN
     );
 
     -- PILOTO
-   IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].piloto')
 		CREATE TABLE GRUPO_9800.piloto (
             cod_piloto INT  IDENTITY PRIMARY KEY,
             piloto_nombre NVARCHAR(50) ,
@@ -371,56 +363,48 @@ BEGIN
 
 
     -- TIPO INCIDENTE
-   IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].tipo_incidente')
         CREATE TABLE GRUPO_9800.tipo_incidente (
             id_tipo_incidente SMALLINT  IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
 
     -- TIPO_SECTOR
-   IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].tipo_sector')
         CREATE TABLE GRUPO_9800.tipo_sector (
             id_tipo_sector smallint IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
 
     -- TIPO NEUMATICO
-   IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].tipo_neumatico')
         CREATE TABLE GRUPO_9800.tipo_neumatico (
             id_tipo_neumatico smallint IDENTITY PRIMARY KEY,
             descripcion NVARCHAR(255)
         );
 
     --- PAIS
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].pais')
         CREATE TABLE GRUPO_9800.pais (
             id_pais smallint  IDENTITY PRIMARY KEY,
             nombre NVARCHAR(50) 
         );
     
     -- BANDERA
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].bandera')
         CREATE TABLE GRUPO_9800.bandera (
             id_incidente_bandera INT IDENTITY  PRIMARY KEY,
             incidente_bandera NVARCHAR(255) 
         );
     
     -- CAJA
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].caja')
         CREATE TABLE GRUPO_9800.caja (
             caja_nro_serie NVARCHAR(255) PRIMARY KEY,
             caja_modelo NVARCHAR(50) ,
         );
     
     -- MOTOR
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].motor')
         CREATE TABLE GRUPO_9800.motor (
             motor_nro_serie NVARCHAR(255) PRIMARY KEY,
             motor_modelo NVARCHAR(50) 
         );
     
     --FRENO
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].freno')
         CREATE TABLE GRUPO_9800.freno (
             freno_nro_serie NVARCHAR(255) PRIMARY KEY,
             freno_tamanio_pastilla decimal(18,2) 
@@ -429,17 +413,11 @@ END
 
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'CREATE_TRANSACTIONAL_TABLES' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP PROCEDURE GRUPO_9800.CREATE_TRANSACTIONAL_TABLES
-
-GO
-
 CREATE PROCEDURE [GRUPO_9800].CREATE_TRANSACTIONAL_TABLES
 AS 
 BEGIN 
     -- Neumatico
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'GRUPO_9800.neumatico')
-	BEGIN
+   
     CREATE TABLE GRUPO_9800.neumatico (
         neumatico_nro_serie NVARCHAR(255) PRIMARY KEY,
         id_tipo_neumatico smallint 
@@ -447,10 +425,9 @@ BEGIN
 		ALTER TABLE GRUPO_9800.neumatico
 		ADD CONSTRAINT FK_NeumaticoTiponeumatico
 		FOREIGN KEY (id_tipo_neumatico) REFERENCES GRUPO_9800.tipo_neumatico(id_tipo_neumatico);
-	END
+
     -- Vehiculo
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].vehiculo')
-    BEGIN   
+   
 	    CREATE TABLE GRUPO_9800.vehiculo (
             vehiculo_numero INT,
             vehiculo_modelo NVARCHAR(255),
@@ -465,10 +442,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.vehiculo
 		ADD CONSTRAINT FK_vehiculoPiloto
 		FOREIGN KEY (cod_piloto) REFERENCES GRUPO_9800.piloto(cod_piloto);
-	END
+
     -- Circuito
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].circuito')
-	BEGIN
         CREATE TABLE GRUPO_9800.circuito (
             circuito_codigo INT PRIMARY KEY,
             circuito_nombre NVARCHAR(255)  ,
@@ -477,10 +452,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.circuito
 		ADD CONSTRAINT FK_CircuitoPais
 		FOREIGN KEY (id_pais) REFERENCES GRUPO_9800.pais(id_pais);
-	END
-    -- Carrera
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].carrera')
-	BEGIN
+    
+	-- Carrera
 		CREATE TABLE GRUPO_9800.carrera (
 			codigo_carrera INT PRIMARY KEY,
 			carrera_fecha date,
@@ -492,11 +465,10 @@ BEGIN
 		ALTER TABLE GRUPO_9800.carrera
 		ADD CONSTRAINT FK_CarreraCircuito
 		FOREIGN KEY (circuito_codigo) REFERENCES GRUPO_9800.circuito(circuito_codigo);
-	END
+	
     -- Sector
 
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].sector')
-	BEGIN
+ 
         CREATE TABLE GRUPO_9800.sector (
             codigo_sector INT,
             sector_distancia numeric(18,2),
@@ -511,11 +483,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.sector
 		ADD CONSTRAINT FK_SectorTipoSector
 		FOREIGN KEY (id_tipo_sector) REFERENCES GRUPO_9800.tipo_sector(id_tipo_sector);
-	END
 
     -- PARADA BOX
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].parada_box')
-	BEGIN
         CREATE TABLE GRUPO_9800.parada_box (
             cod_parada_box INT IDENTITY PRIMARY KEY,
             parada_box_vuelta numeric(18,0),
@@ -526,11 +495,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.parada_box
 		ADD CONSTRAINT FK_ParadaboxCarrera
 		FOREIGN KEY(codigo_carrera) REFERENCES GRUPO_9800.carrera(codigo_carrera);
-	END
 
     -- PARADA BOX X vehiculo
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].parada_box_por_vehiculo')
-	BEGIN
         CREATE TABLE GRUPO_9800.parada_box_por_vehiculo (
 			cod_parada_box_por_vehiculo INT IDENTITY PRIMARY KEY,
             cod_parada_box  INT,
@@ -559,10 +525,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.parada_box_por_vehiculo
 		ADD CONSTRAINT FK_ParadaboxporvehiculoNeumaticoNuevo
 		FOREIGN KEY(nro_serie_neumatico_nuevo) REFERENCES GRUPO_9800.neumatico(neumatico_nro_serie);
-	END
+
     -- TELEMETRIA AUTO
-	IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].telemetria_auto')
-	BEGIN
         CREATE TABLE GRUPO_9800.telemetria_auto (
             tele_auto_cod INT PRIMARY KEY,
             tele_fecha smalldatetime ,
@@ -591,11 +555,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.telemetria_auto
 		ADD CONSTRAINT FK_TelemetriaautoSector
 		FOREIGN KEY (codigo_sector,circuito_codigo) REFERENCES GRUPO_9800.sector(codigo_sector,circuito_codigo);
-	END
 
     -- TELEMETRIA CAJA
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].telemetria_caja')
-	BEGIN
         CREATE TABLE GRUPO_9800.telemetria_caja (
             tele_auto_cod INT ,
             caja_nro_serie NVARCHAR(255) ,
@@ -612,10 +573,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.telemetria_caja
 		ADD CONSTRAINT FK_TelemetriacajaCaja
 		FOREIGN KEY(caja_nro_serie) REFERENCES GRUPO_9800.caja(caja_nro_serie);
-	END
+
     -- TELEMETRIA MOTOR
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].telemetria_motor')
-	BEGIN
         CREATE TABLE GRUPO_9800.telemetria_motor (
         tele_auto_cod INT ,
         motor_nro_serie NVARCHAR(255) ,
@@ -633,10 +592,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.telemetria_motor
 		ADD CONSTRAINT FK_TelemetriamotorMotor
 		FOREIGN KEY(motor_nro_serie) REFERENCES GRUPO_9800.motor(motor_nro_serie);
-	END
+
     --- TELEMETRIA FRENO
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].telemetria_freno')
-	BEGIN
         CREATE TABLE GRUPO_9800.telemetria_freno (
         tele_auto_cod INT ,
         freno_nro_serie NVARCHAR(255) ,
@@ -654,11 +611,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.telemetria_freno
 		ADD CONSTRAINT FK_TelemetriafrenoFreno
 		FOREIGN KEY(freno_nro_serie) REFERENCES GRUPO_9800.freno(freno_nro_serie);
-	END
+
     -- TELEMETRIA NEUMATICO
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].telemetria_neumatico')
-	BEGIN
- 
 		CREATE TABLE GRUPO_9800.telemetria_neumatico (
 			tele_auto_cod INT ,
 			neumatico_nro_serie NVARCHAR(255), 
@@ -672,14 +626,12 @@ BEGIN
 		ALTER TABLE GRUPO_9800.telemetria_neumatico
 		ADD CONSTRAINT FK_Telemetrianeumatico_Telemetriaauto
 		FOREIGN KEY(tele_auto_cod) REFERENCES GRUPO_9800.telemetria_auto(tele_auto_cod);
-	end
+
     /*ALTER TABLE telemetria_neumatico
     ADD CONSTRAINT FK_TelemetrianeumaticoNeumatico
     FOREIGN KEY(neumatico_nro_serie) REFERENCES neumatico(neumatico_nro_serie);*/
 
     -- INCIDENTE
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].incidente')
-	BEGIN
         CREATE TABLE GRUPO_9800.incidente (
         cod_incidente INT IDENTITY  PRIMARY KEY,
         codigo_sector INT ,
@@ -700,10 +652,8 @@ BEGIN
 		ALTER TABLE GRUPO_9800.incidente
 		ADD CONSTRAINT FK_IncidenteBandera
 		FOREIGN KEY (id_incidente_bandera) REFERENCES GRUPO_9800.bandera(id_incidente_bandera);
-	END
+
     -- INCIDENTE POR AUTO
-    IF NOT EXISTS(SELECT [name] FROM sys.tables WHERE [name] = '[GRUPO_9800].incidente_por_auto')
-	BEGIN
 		CREATE TABLE GRUPO_9800.incidente_por_auto (
 			vehiculo_numero INT,
 			cod_escuderia INT,
@@ -720,7 +670,7 @@ BEGIN
 		ALTER TABLE GRUPO_9800.incidente_por_auto
 		ADD CONSTRAINT FK_IncidenteporautoIncidente
 		FOREIGN KEY(cod_incidente) REFERENCES GRUPO_9800.incidente(cod_incidente);
-	END    
+	
 END
 GO
 
@@ -970,7 +920,10 @@ BEGIN
 	(parada_box_vuelta,parada_box_tiempo,codigo_carrera)
 	SELECT  PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
 	FROM gd_esquema.Maestra
+	WHERE PARADA_BOX_VUELTA IS NOT NULL
+	AND PARADA_BOX_TIEMPO IS NOT NULL
 	GROUP BY PARADA_BOX_VUELTA,PARADA_BOX_TIEMPO,CODIGO_CARRERA
+	
 END 
 
 ----------------------------
@@ -1227,7 +1180,7 @@ BEGIN
 	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
 	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
-	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
+	GROUP BY p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO2_NRO_SERIE_NUEVO,NEUMATICO2_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO ,NEUMATICO3_NRO_SERIE_VIEJO
 	FROM gd_esquema.Maestra	m
@@ -1236,7 +1189,7 @@ BEGIN
 	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
 	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
-	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
+	GROUP BY p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO3_NRO_SERIE_NUEVO,NEUMATICO3_NRO_SERIE_VIEJO
     UNION
     SELECT p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO ,NEUMATICO4_NRO_SERIE_VIEJO
 	FROM gd_esquema.Maestra	m
@@ -1245,7 +1198,7 @@ BEGIN
 	AND p.parada_box_vuelta = m.PARADA_BOX_VUELTA 
 	AND p.parada_box_tiempo = m.PARADA_BOX_TIEMPO)
 	WHERE AUTO_NUMERO IS NOT NULL
-	GROUP BY cod_parada_box,cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO	
+	GROUP BY p.cod_parada_box,e.cod_escuderia,AUTO_NUMERO,NEUMATICO4_NRO_SERIE_NUEVO,NEUMATICO4_NRO_SERIE_VIEJO	
 END 
 
 GO
@@ -1282,7 +1235,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
-	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vacías o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vacï¿½as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
 END CATCH
 
 IF (	EXISTS (SELECT 1 FROM [GRUPO_9800].carrera)
