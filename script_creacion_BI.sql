@@ -163,7 +163,9 @@ BEGIN
 	WHILE(@@FETCH_STATUS = 0)
 	BEGIN
 			SET @Anio = YEAR(@Date)
-			SET @Cuatrimestre = CASE WHEN MONTH(@Date) = 1 OR MONTH(@Date) = 2  OR MONTH(@Date) = 3 OR MONTH(@Date) = 4 then 1						 WHEN MONTH(@Date) = 5 OR MONTH(@Date) = 6  OR MONTH(@Date) = 7 OR MONTH(@Date) = 8 then 2						 WHEN MONTH(@Date) = 9 OR MONTH(@Date) = 10 OR MONTH(@Date) = 11 OR MONTH(@Date) = 12 then 3
+			SET @Cuatrimestre = CASE WHEN MONTH(@Date) = 1 OR MONTH(@Date) = 2  OR MONTH(@Date) = 3 OR MONTH(@Date) = 4 then 1
+						 WHEN MONTH(@Date) = 5 OR MONTH(@Date) = 6  OR MONTH(@Date) = 7 OR MONTH(@Date) = 8 then 2
+						 WHEN MONTH(@Date) = 9 OR MONTH(@Date) = 10 OR MONTH(@Date) = 11 OR MONTH(@Date) = 12 then 3
 						 END
 
 			IF NOT EXISTS (SELECT * FROM GRUPO_9800.BI_TIEMPO WHERE (ANIO = @Anio AND @Cuatrimestre = @Cuatrimestre))
@@ -263,4 +265,10 @@ Tener en cuenta que, para el cálculo del desgaste de los neumáticos, se
 toma la diferencia de mm del mismo entre la medición inicial y final de 
 cada vuelta. Lo mismo aplica para el desgaste de frenos. 
 Para el cálculo del desgaste del motor se toma en cuenta la perdida de 
-potencia. */SELECT desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigoFROM GRUPO_9800.BI_circuitoGROUP BY desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigo
+potencia. 
+*/
+
+SELECT desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigo
+FROM GRUPO_9800.BI_circuito
+GROUP BY desgaste_neumatico,desgaste_freno,desgate_caja,desgaste_motor,vehiculo_numero,cod_escuderia,numero_vuelta,circuito_codigo
+
