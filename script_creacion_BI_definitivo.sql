@@ -126,10 +126,6 @@ GO
 CREATE PROCEDURE [GRUPO_9800].CREATE_DIMENSION_TABLES
 AS
 BEGIN
-		/* CREATE TABLE GRUPO_9800.BI_tipo_incidente (
-            id_tipo_incidente SMALLINT  IDENTITY PRIMARY KEY,
-            descripcion NVARCHAR(255) 
-        );*/
 
 		CREATE TABLE GRUPO_9800.BI_tipo_sector (
             id_tipo_sector smallint PRIMARY KEY,
@@ -172,11 +168,6 @@ BEGIN
 		numero_vuelta DECIMAL(18,0),
 		PRIMARY KEY (vehiculo_numero, cod_escuderia, cod_incidente)
 		);
-
-		CREATE TABLE GRUPO_9800.BI_tipo_incidente(
-            id_tipo_incidente SMALLINT PRIMARY KEY,
-            descripcion NVARCHAR(255) 
-        );
 
 		CREATE TABLE GRUPO_9800.BI_sector (
             codigo_sector INT,
@@ -238,6 +229,7 @@ BEGIN
             DESCRIPCION_SECTOR NVARCHAR(255),
             COD_ESCUDERIA INT REFERENCES GRUPO_9800.BI_ESCUDERIA,
             CODIGO_INCIDENTE INT,
+			INCIDENTES_TOTALES INT,
             COD_TIEMPO INT REFERENCES GRUPO_9800.BI_TIEMPO
         );
     
@@ -254,15 +246,6 @@ BEGIN
 END
 GO
 
--- BI tipo de incidente
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tipo_incidente
-AS
-BEGIN
-
-	INSERT INTO GRUPO_9800.BI_tipo_incidente 
-	SELECT * FROM GRUPO_9800.tipo_incidente
-END
-GO
 -- BI tipo de sector
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tipo_sector
 AS
@@ -329,7 +312,6 @@ GO
 
 EXEC [GRUPO_9800].CREATE_DIMENSION_TABLES
 EXEC [GRUPO_9800].CREATE_BI_TABLES
-EXEC [GRUPO_9800].MIGRAR_BI_tipo_incidente
 EXEC [GRUPO_9800].MIGRAR_BI_incidente
 EXEC [GRUPO_9800].MIGRAR_BI_tipo_sector
 EXEC [GRUPO_9800].MIGRAR_BI_parada_box
@@ -389,18 +371,18 @@ GO*/
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_INCIDENTE /*CAMBIAR*/
 AS
 BEGIN
-    INSERT INTO GRUPO_9800.BI_INCIDENTES (CIRCUITO_CODIGO,DESCRIPCION_SECTOR,COD_ESCUDERIA,CODIGO_INCIDENTE,COD_TIEMPO)
-    SELECT i.circuito_codigo,ts.descripcion,ia.cod_escuderia,ia.cod_incidente,t.cod_tiempo
-	--(SELECT count(cod_incidente) FROM GRUPO_9800.BI_incidente_por_auto WHERE ca.codigo_carrera = codigo_carrera GROUP BY codigo_carrera) 'Incidentes por anio'
+    INSERT INTO GRUPO_9800.BI_INCIDENTES (CIRCUITO_CODIGO,DESCRIPCION_SECTOR,COD_ESCUDERIA,CODIGO_INCIDENTE,INCIDENTES_TOTALES,COD_TIEMPO)
+    SELECT i.circuito_codigo,ts.descripcion,ia.cod_escuderia,ia.cod_incidente,
+	(SELECT count(cod_incidente) from GRUPO_9800.BI_incidente_por_auto) 'Incidentes totales',
+	t.cod_tiempo
 	FROM GRUPO_9800.BI_circuito c
 	JOIN GRUPO_9800.BI_incidente i ON c.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.BI_incidente_por_auto ia ON i.cod_incidente = ia.cod_incidente
-	JOIN GRUPO_9800.BI_tipo_incidente ti ON ti.id_tipo_incidente = ia.id_tipo_incidente 
 	JOIN GRUPO_9800.BI_sector s ON s.codigo_sector = i.codigo_sector AND s.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.BI_tipo_sector ts ON ts.id_tipo_sector = s.id_tipo_sector
 	JOIN GRUPO_9800.BI_carrera ca ON i.codigo_carrera = ca.codigo_carrera
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio 
-    --GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia
+    GROUP BY i.circuito_codigo,ts.descripcion,ia.cod_escuderia,ia.cod_incidente, t.cod_tiempo
 END
 GO
 EXEC [GRUPO_9800].MIGRATE_BI_incidente
@@ -452,9 +434,10 @@ incidentes
 */
 
 --Hay que cambiarla, no se me ocurre como agrupar los top 3 por grupo
-SELECT TOP 3 circuito_codigo,anio,COUNT(i.codigo_incidente) 'Cantidad de incidentes por anio'
+SELECT TOP 3 circuito_codigo,anio,cantidad_incidentes 'Cantidad de incidentes por anio'
 FROM GRUPO_9800.BI_incidentes i
 JOIN GRUPO_9800.BI_TIEMPO t ON t.cod_tiempo = i.cod_tiempo 
+WHERE t.anio = YEAR(getdate()) -- ACLARAR EN ESTRATEGIA
 GROUP BY i.circuito_codigo,t.ANIO
 ORDER BY MAX(3) DESC
 
@@ -476,14 +459,12 @@ SELECT * FROM TOPTHREE WHERE RowNo <= 3
 Promedio de incidentes que presenta cada escudería por año en los 
 distintos tipo de sectores. 
 */
-
+-- ACLARAR EN ESTRATEGIA QUE POR PROMEDIO DE INCIDENTES SE ENTIENDE LA CANTIDAD DE INCIDENTES POR ANIO. NO TIENE SENTIDO HACER UN PROMEDIO POR ANIO POR ESCUDERIA, TE DA LA CANTIDAD.
+SELECT * FROM GRUPO_9800.incidente
 
 -- Quedo feo, pero asi anda
 -- De alguna manera hay que hacer un AVG del count de codigo_incidente
-SELECT  COUNT(i.codigo_incidente)/(SELECT COUNT(*) FROM GRUPO_9800.BI_incidentes inc
-							JOIN GRUPO_9800.BI_TIEMPO ti ON ti.cod_tiempo = inc.cod_tiempo 
-							WHERE inc.cod_escuderia = i.cod_escuderia AND ti.anio = t.anio
-							GROUP BY inc.cod_escuderia,ti.anio)
+SELECT  COUNT(i.codigo_incidente)
  'Promedio de incidentes',i.cod_escuderia,t.anio,i.descripcion_sector
 FROM GRUPO_9800.BI_incidentes i
 JOIN GRUPO_9800.BI_TIEMPO t ON t.cod_tiempo = i.cod_tiempo 
@@ -493,7 +474,6 @@ GROUP BY i.cod_escuderia,t.anio,i.descripcion_sector
 /*
 Cantidad de paradas por circuito por escudería por año.
 */
-
 SELECT COUNT(cod_parada_box) 'Cantidad de paradas',circuito_codigo,cod_escuderia,anio
 FROM GRUPO_9800.BI_paradas
 GROUP BY circuito_codigo,cod_escuderia,anio
