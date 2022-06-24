@@ -458,7 +458,6 @@ BEGIN
 			codigo_carrera INT PRIMARY KEY,
 			carrera_fecha date,
 			carrera_clima varchar(100),
-			carrera_total_carrera numeric(18,2),
 			carrera_cant_vueltas INT,
 			circuito_codigo INT 
 		);
@@ -1093,12 +1092,13 @@ CREATE PROCEDURE [GRUPO_9800].migrar_vehiculo
 AS
 BEGIN
         INSERT INTO GRUPO_9800.vehiculo
-        (vehiculo_numero,cod_escuderia,vehiculo_modelo)
-        SELECT AUTO_NUMERO, e.cod_escuderia, AUTO_MODELO
+        (vehiculo_numero,cod_escuderia,vehiculo_modelo,cod_piloto)
+        SELECT AUTO_NUMERO, e.cod_escuderia, AUTO_MODELO,p.cod_piloto
         FROM gd_esquema.maestra m
 		JOIN GRUPO_9800.escuderia e ON e.escuderia_nombre = m.ESCUDERIA_NOMBRE
+		JOIN GRUPO_9800.piloto p ON  p.piloto_nombre = m.PILOTO_NOMBRE AND p.piloto_apellido = m.PILOTO_APELLIDO
 		WHERE AUTO_NUMERO IS NOT NULL
-		GROUP BY AUTO_NUMERO,e.cod_escuderia, AUTO_MODELO
+		GROUP BY AUTO_NUMERO,e.cod_escuderia, AUTO_MODELO,p.cod_piloto
 END
 
 GO
@@ -1405,5 +1405,30 @@ DROP INDEX GRUPO_9800.incidente.INDEX_INCIDENTE
 DROP INDEX GRUPO_9800.incidente.INDEX_INCIDENTE
 DROP INDEX GRUPO_9800.incidente_por_auto.INDEX_TIPO_INCIDENTE
 
+DROP TABLE GRUPO_9800.incidente_por_auto;
+	select * from GRUPO_9800.incidente;
+	select * from GRUPO_9800.telemetria_neumatico;
+	select * from GRUPO_9800.telemetria_freno;
+	select * from GRUPO_9800.telemetria_motor;
+	select * from GRUPO_9800.telemetria_caja;
+	select * from GRUPO_9800.telemetria_auto;
+	select * from GRUPO_9800.parada_box_por_vehiculo;
+	select * from GRUPO_9800.parada_box;
+	select * from GRUPO_9800.sector;
+	select * from GRUPO_9800.carrera;
+	select * from GRUPO_9800.circuito;
+	select * from GRUPO_9800.vehiculo;
+	select * from GRUPO_9800.neumatico;
+	select * from GRUPO_9800.freno;
+	select * from GRUPO_9800.motor;
+	select * from GRUPO_9800.caja;
+	select * from GRUPO_9800.bandera;
+	select * from GRUPO_9800.pais;
+	select * from GRUPO_9800.tipo_neumatico;
+	select * from GRUPO_9800.tipo_sector;
+	select * from GRUPO_9800.tipo_incidente;
+	select * from GRUPO_9800.piloto
+	select * from GRUPO_9800.escuderia;
+	
 */
   
