@@ -122,11 +122,6 @@ IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U'
 	DROP TABLE GRUPO_9800.BI_TIPO_INCIDENTE
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_CARRERA' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_CARRERA
-GO
-
-
 --DROP PREVENTIVO DE PROCEDURES---------------------------------------------------------------
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_circuito' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_circuito
@@ -202,10 +197,6 @@ GO
 
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_INCIDENTE_POR_AUTO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_INCIDENTE_POR_AUTO
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_CARRERA' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_CARRERA
 GO
 
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_SECTOR' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
@@ -305,13 +296,6 @@ BEGIN
 			id_incidente_bandera INT ,
 		);
 
-		CREATE TABLE GRUPO_9800.BI_carrera (
-			codigo_carrera INT PRIMARY KEY,
-			carrera_fecha date,
-			carrera_clima varchar(100),
-			carrera_cant_vueltas INT,
-			circuito_codigo INT 
-		);
 		CREATE TABLE GRUPO_9800.BI_vehiculo (
             vehiculo_numero INT,
             vehiculo_modelo NVARCHAR(255),
@@ -514,15 +498,6 @@ BEGIN
 END
 GO
 
--- BI Carrera
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_carrera
-AS 
-BEGIN
-	INSERT INTO GRUPO_9800.BI_carrera
-	SELECT * FROM GRUPO_9800.carrera
-END
-GO
-
 
 
 /*MIGRACIÓN*/
@@ -578,7 +553,7 @@ BEGIN
 	(SELECT count(inc_a.cod_incidente) 
 	FROM GRUPO_9800.BI_incidente inc 
 	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
-	JOIN GRUPO_9800.BI_carrera carr ON inc.codigo_carrera = carr.codigo_carrera
+	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
 	WHERE YEAR(carr.carrera_fecha) = t.anio
 	AND inc_a.cod_escuderia = ia.cod_escuderia
 	GROUP BY YEAR(carr.carrera_fecha),inc_a.cod_escuderia) 'Incidentes totales',
@@ -587,7 +562,7 @@ BEGIN
 	JOIN GRUPO_9800.BI_incidente i ON c.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.incidente_por_auto ia ON i.cod_incidente = ia.cod_incidente
 	JOIN GRUPO_9800.sector s ON s.codigo_sector = i.codigo_sector AND s.circuito_codigo = i.circuito_codigo
-	JOIN GRUPO_9800.BI_carrera ca ON i.codigo_carrera = ca.codigo_carrera
+	JOIN GRUPO_9800.carrera ca ON i.codigo_carrera = ca.codigo_carrera
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio 
     GROUP BY i.circuito_codigo,s.id_tipo_sector,ia.cod_escuderia,ia.cod_incidente, t.anio,t.cod_tiempo
 END
@@ -701,7 +676,6 @@ EXEC [GRUPO_9800].MIGRAR_BI_tipo_sector
 EXEC [GRUPO_9800].MIGRAR_BI_parada_box
 EXEC [GRUPO_9800].MIGRAR_BI_circuito
 EXEC [GRUPO_9800].MIGRAR_BI_escuderia
-EXEC [GRUPO_9800].MIGRAR_BI_carrera
 EXEC [GRUPO_9800].MIGRAR_BI_caja
 EXEC [GRUPO_9800].MIGRAR_BI_motor
 EXEC [GRUPO_9800].MIGRAR_BI_freno
@@ -786,7 +760,8 @@ CREATE VIEW GRUPO_9800.top3MayorTiempoEnBoxes
 AS
 	SELECT TOP 3 circuito_codigo,SUM(TIEMPO_PARADA_BOX) 'Tiempo consumido por circuito'
 	FROM GRUPO_9800.BI_paradas
-	GROUP BY circuito_codigo DESC
+	GROUP BY circuito_codigo
+	ORDER BY 2 DESC
 
 /*
 Máxima velocidad alcanzada por cada auto en cada tipo de sector de cada 
@@ -855,4 +830,3 @@ GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo,caja_nro_serie,motor_nro_
 freno_nro_serie1,freno_nro_serie2,freno_nro_serie3,freno_nro_serie4
 GO
 
-SELECT * FROM GRUPO_9800.top3MayorTiempoEnBoxes
