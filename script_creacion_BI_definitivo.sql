@@ -48,121 +48,61 @@ IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='V'
 GO
 --DROP PREVENTIVO DE TABLAS---------------------------------------------------------------
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_DESGASTE_VISTAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_DESGASTE_VISTAS
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_fact_table_1' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_fact_table_1
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_INCIDENTES' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_INCIDENTES
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_fact_table_2' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_fact_table_2
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_CIRCUITO_VISTAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_CIRCUITO_VISTAS
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_fact_table_3' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_fact_table_3
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_PARADAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_PARADAS
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_circuito' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_circuito
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_CIRCUITO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_CIRCUITO
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_tiempo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_tiempo
 GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_TIEMPO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_TIEMPO
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_neumatico
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_motor' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_motor
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_freno' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_freno
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_caja' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_caja
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_piloto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_piloto
-GO
-
+/*
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_tipo_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP TABLE GRUPO_9800.BI_tipo_neumatico
 GO
-
+*/
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_vehiculo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 	DROP TABLE GRUPO_9800.BI_vehiculo
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_ESCUDERIA' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_ESCUDERIA
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_escuderia' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_escuderia
 GO
 
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_VEHICULO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_VEHICULO
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_TIPO_SECTOR' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_TIPO_SECTOR
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_PARADA_BOX' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_PARADA_BOX
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_INCIDENTE' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_INCIDENTE
-GO
-
-IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_TIPO_INCIDENTE' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-	DROP TABLE GRUPO_9800.BI_TIPO_INCIDENTE
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='U' AND NAME = 'BI_tipo_sector' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP TABLE GRUPO_9800.BI_tipo_sector
 GO
 
 --DROP PREVENTIVO DE PROCEDURES---------------------------------------------------------------
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_fact_table_1' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_fact_table_1
+GO
+
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_fact_table_2' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_fact_table_2
+GO
+
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_fact_table_3' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_fact_table_3
+GO
+
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_circuito' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_circuito
 GO
 
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_vehiculo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_vehiculo
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_caja' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_caja
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_motor' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_motor
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_neumatico
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_freno' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_freno
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_tipo_incidente' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tipo_incidente
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_DESGASTE_VISTAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_DESGASTE_VISTAS
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_piloto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_piloto
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_tipo_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tipo_neumatico
 GO
 
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_escuderia' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
@@ -173,45 +113,22 @@ IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' 
 DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tipo_sector
 GO
 
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_parada_box' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_parada_box
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_tiempo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tiempo
+GO
+/*
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_tipo_incidente' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tipo_incidente
 GO
 
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_CIRCUITO_VISTAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_CIRCUITO_VISTAS
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_piloto' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_piloto
 GO
 
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_PARADAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_PARADAS
+IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_tipo_neumatico' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_tipo_neumatico
 GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRATE_BI_INCIDENTE' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRATE_BI_INCIDENTE
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_INCIDENTE' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_INCIDENTE
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_TIPO_INCIDENTE' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_TIPO_INCIDENTE
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_INCIDENTE_POR_AUTO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_INCIDENTE_POR_AUTO
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_SECTOR' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_SECTOR
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_TIEMPO' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_TIEMPO
-GO
-
-IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'MIGRAR_BI_PARADAS' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
-DROP PROCEDURE  GRUPO_9800.MIGRAR_BI_PARADAS
-GO
+*/
 
 IF EXISTS(SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='P' AND NAME = 'CREATE_BI_TABLES' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
 DROP PROCEDURE  GRUPO_9800.CREATE_BI_TABLES
@@ -265,7 +182,7 @@ BEGIN
             PRIMARY KEY (vehiculo_numero, cod_escuderia)
         );
 
-		 CREATE TABLE GRUPO_9800.BI_TIEMPO(
+		 CREATE TABLE GRUPO_9800.BI_tiempo(
             cod_tiempo INT IDENTITY PRIMARY KEY,
             anio INT NOT NULL,
 			cuatrimestre INT NOT NULL
@@ -303,20 +220,20 @@ BEGIN
             cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
             circuito_codigo INT REFERENCES GRUPO_9800.BI_circuito,
             cod_tiempo INT,
-            cantidad_paradas INT,
+            cantidad_de_paradas INT,
             tiempo_consumido_parada_box DECIMAL(18,2),
 			tiempo_promedio_parada_box DECIMAL(18,2)
-			PRIMARY KEY(COD_ESCUDERIA,CIRCUITO_CODIGO,COD_TIEMPO)
+			PRIMARY KEY(cod_escuderia,circuito_codigo,cod_tiempo)
 		);
 
 		 CREATE TABLE GRUPO_9800.BI_fact_table_3( 
 			circuito_codigo INT REFERENCES GRUPO_9800.BI_circuito,
-            id_tipo_sector INT REFERENCES GRUPO_9800.BI_tipo_sector,
+            id_tipo_sector SMALLINT REFERENCES GRUPO_9800.BI_tipo_sector,
 			cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
 			cod_tiempo INT,
             incidentes_totales INT,
             promedio_incidentes DECIMAL(18,2),
-			PRIMARY KEY(circuito_codigo,id_tipo_sector,cod_escuderia)
+			PRIMARY KEY(circuito_codigo,id_tipo_sector,cod_escuderia,cod_tiempo)
 		);
     
        
@@ -400,7 +317,7 @@ GO
 
 
 /*MIGRACIÓN*/
-
+/*
 GO
 -- Migracion fact table desgaste
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_1
@@ -472,6 +389,7 @@ BEGIN
 
 END
 GO
+*/
 
 -- Migracion fact table paradas de box
 
@@ -567,7 +485,7 @@ BEGIN
     GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo,t.anio
 END
 GO
-s
+/*
 
 select * from GRUPO_9800.incidente_por_auto IA 
 join GRUPO_9800.incidente I on IA.cod_incidente = I.cod_incidente
@@ -578,6 +496,8 @@ SELECT inc.circuito_codigo,COUNT(inc_a.cod_incidente),YEAR(carrera_fecha)
 	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
 	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
 GROUP BY inc.circuito_codigo,YEAR(carrera_fecha)
+*/
+
 -- Tabla de tiempo
 
 CREATE FUNCTION GRUPO_9800.obtener_cuatrimestre (@Date smalldatetime )
@@ -607,7 +527,7 @@ BEGIN
 END  
 
 GO
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_TIEMPO
+CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tiempo
 AS
 BEGIN
 	DECLARE date_cursor CURSOR FOR SELECT CARRERA_FECHA FROM GRUPO_9800.CARRERA
@@ -641,24 +561,19 @@ GO
 
 EXEC [GRUPO_9800].CREATE_DIMENSION_TABLES
 EXEC [GRUPO_9800].CREATE_BI_TABLES
-EXEC [GRUPO_9800].MIGRAR_BI_incidente
 EXEC [GRUPO_9800].MIGRAR_BI_tipo_sector
-EXEC [GRUPO_9800].MIGRAR_BI_parada_box
 EXEC [GRUPO_9800].MIGRAR_BI_circuito
 EXEC [GRUPO_9800].MIGRAR_BI_escuderia
-EXEC [GRUPO_9800].MIGRAR_BI_caja
-EXEC [GRUPO_9800].MIGRAR_BI_motor
-EXEC [GRUPO_9800].MIGRAR_BI_freno
-EXEC [GRUPO_9800].MIGRAR_BI_neumatico
-EXEC [GRUPO_9800].MIGRAR_BI_tipo_incidente
-EXEC [GRUPO_9800].MIGRAR_BI_tipo_neumatico
-EXEC [GRUPO_9800].MIGRAR_BI_piloto
 EXEC [GRUPO_9800].MIGRAR_BI_vehiculo
-EXEC [GRUPO_9800].MIGRAR_BI_TIEMPO
-EXEC [GRUPO_9800].MIGRATE_BI_INCIDENTE
-EXEC [GRUPO_9800].MIGRATE_BI_CIRCUITO_VISTAS
-EXEC [GRUPO_9800].MIGRATE_BI_PARADAS
-EXEC [GRUPO_9800].MIGRATE_BI_DESGASTE_VISTAS
+EXEC [GRUPO_9800].MIGRAR_BI_tiempo
+--EXEC [GRUPO_9800].MIGRATE_BI_fact_table_1
+EXEC [GRUPO_9800].MIGRATE_BI_fact_table_2
+EXEC [GRUPO_9800].MIGRATE_BI_fact_table_3
+--EXEC [GRUPO_9800].MIGRAR_BI_parada_box
+
+--EXEC [GRUPO_9800].MIGRAR_BI_tipo_incidente
+--EXEC [GRUPO_9800].MIGRAR_BI_tipo_neumatico
+
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Ejecuto procedures de tabla de hechos
@@ -671,46 +586,46 @@ incidentes
 */
 
 -- OK
+
 GO
 CREATE VIEW GRUPO_9800.top3CircuitosMasPeligrosos
 AS
 
 	SELECT groups.codigo,groups.anio,groups.[incidentes_por_anio] FROM (
-	SELECT i.circuito_codigo [codigo],t.anio [anio] ,COUNT(DISTINCT i.codigo_incidente) [incidentes_por_anio]
+	SELECT circuito_codigo [codigo], t.anio [anio], incidentes_totales [incidentes_por_anio]
 		  ,ROW_NUMBER() OVER (
-						 PARTITION BY t.anio
-						 ORDER BY COUNT(DISTINCT i.codigo_incidente) DESC
+						 PARTITION BY t.anio,circuito_codigo
+						 ORDER BY incidentes_totales DESC
          		   ) AS [ROW NUMBER]
-	  FROM GRUPO_9800.BI_incidentes i
-		JOIN GRUPO_9800.BI_TIEMPO t ON t.cod_tiempo = i.cod_tiempo
-		GROUP BY i.circuito_codigo,t.anio
+	  FROM GRUPO_9800.BI_fact_table_3 ft
+		JOIN GRUPO_9800.BI_tiempo t ON t.cod_tiempo = ft.cod_tiempo
+		GROUP BY circuito_codigo,t.anio,incidentes_totales
 	  ) groups
 	WHERE groups.[ROW NUMBER] <=3
 	
 GO
 
-
-
-
 -- OK 
 CREATE VIEW GRUPO_9800.promedioIncidentesPorEscuderiaXanio
 AS
-	SELECT  COUNT(DISTINCT i.codigo_incidente) / i.incidentes_totales_por_anio_por_escuderia 'Promedio de incidentes',i.cod_escuderia,t.anio,i.id_tipo_sector
-	FROM GRUPO_9800.BI_incidentes i
-	JOIN GRUPO_9800.BI_TIEMPO t ON t.cod_tiempo = i.cod_tiempo 
-	GROUP BY i.cod_escuderia,t.anio,i.id_tipo_sector,i.incidentes_totales_por_anio_por_escuderia
+	SELECT cod_escuderia,promedio_incidentes,t.anio
+	FROM GRUPO_9800.BI_fact_table_3 ft
+	JOIN GRUPO_9800.BI_tiempo t ON t.cod_tiempo = ft.cod_tiempo  
+	GROUP BY cod_escuderia,promedio_incidentes,t.anio
 
 GO
+
+
 /*
 Cantidad de paradas por circuito por escudería por año.
 */
 
 CREATE VIEW GRUPO_9800.paradasPorCircuito
 AS
-	SELECT COUNT(cod_parada_box) 'Cantidad de paradas',p.circuito_codigo,p.cod_escuderia,t.anio
-	FROM GRUPO_9800.BI_paradas p
-	JOIN GRUPO_9800.BI_TIEMPO t ON p.cod_tiempo = t.cod_tiempo
-	GROUP BY p.circuito_codigo,p.cod_escuderia,t.anio
+	SELECT circuito_codigo,cod_escuderia,t.anio,cantidad_de_paradas
+	FROM GRUPO_9800.BI_fact_table_2 ft 
+	JOIN GRUPO_9800.BI_tiempo t ON ft.cod_tiempo = t.cod_tiempo
+	GROUP BY circuito_codigo,cod_escuderia,t.anio,cantidad_de_paradas
 
 /*
 Tiempo promedio que tardó cada escudería en las paradas por cuatrimestre.
@@ -718,25 +633,31 @@ Tiempo promedio que tardó cada escudería en las paradas por cuatrimestre.
 GO
 CREATE VIEW GRUPO_9800.tiempoPromedioPorCuatrimestre
 AS
-	SELECT AVG(tiempo_parada_box) 'Tiempo promedio en parada de box',p.cod_escuderia,t.cuatrimestre,t.anio
-	FROM GRUPO_9800.BI_paradas p
-	JOIN GRUPO_9800.BI_TIEMPO t ON p.cod_tiempo = t.cod_tiempo
-	GROUP BY p.cod_escuderia,t.cuatrimestre,t.anio
-
+	SELECT cod_escuderia,tiempo_promedio_parada_box,cod_tiempo
+	FROM GRUPO_9800.BI_fact_table_2 p
+	GROUP BY p.cod_escuderia,cod_tiempo,tiempo_promedio_parada_box
 
 
 GO
 CREATE VIEW GRUPO_9800.top3MayorTiempoEnBoxes
 AS
-	SELECT TOP 3 circuito_codigo,SUM(TIEMPO_PARADA_BOX) 'Tiempo consumido por circuito'
-	FROM GRUPO_9800.BI_paradas
-	GROUP BY circuito_codigo
+	SELECT TOP 3 circuito_codigo,tiempo_consumido_parada_box 'Tiempo consumido por circuito'
+	FROM GRUPO_9800.BI_fact_table_2
+	GROUP BY circuito_codigo,tiempo_consumido_parada_box
 	ORDER BY 2 DESC
 
+
 /*
-Máxima velocidad alcanzada por cada auto en cada tipo de sector de cada 
-circuito.
-*/ 
+SELECT * FROM GRUPO_9800.tiempoPromedioPorCuatrimestre
+SELECT * FROM GRUPO_9800.top3CircuitosMasPeligrosos
+SELECT * FROM GRUPO_9800.paradasPorCircuito
+SELECT * FROM GRUPO_9800.promedioIncidentesPorEscuderiaXanio
+SELECT * FROM GRUPO_9800.top3MayorTiempoEnBoxes
+*/
+/*
+--Máxima velocidad alcanzada por cada auto en cada tipo de sector de cada 
+--circuito.
+
 
 -- OK
 GO
@@ -747,9 +668,9 @@ AS
 	GROUP BY vehiculo_numero,cod_escuderia,id_tipo_sector,circuito_codigo
 
 
-/*
-Los 3 de circuitos con mayor consumo de combustible promedio
-*/
+
+-- Los 3 de circuitos con mayor consumo de combustible promedio
+
  -- OK
 
 GO
@@ -759,11 +680,11 @@ AS
 	FROM GRUPO_9800.BI_circuito_vistas
 	GROUP BY circuito_codigo, maximo_combustible_consumido
 
-/*
- Mejor tiempo de vuelta de cada escudería por circuito por año. 
-El mejor tiempo está dado por el mínimo tiempo en que un auto logra 
-realizar una vuelta de un circuito.
-*/
+
+-- Mejor tiempo de vuelta de cada escudería por circuito por año. 
+-- El mejor tiempo está dado por el mínimo tiempo en que un auto logra 
+-- realizar una vuelta de un circuito.
+
 -- OK
 
 GO
@@ -776,15 +697,15 @@ AS
 
 --Hay que ver porque los tipos de sector del 1 y el 2 me dan lo mismo
 
-/*
-Desgaste promedio de cada componente de cada auto por vuelta por 
-circuito. 
-Tener en cuenta que, para el cálculo del desgaste de los neumáticos, se 
-toma la diferencia de mm del mismo entre la medición inicial y final de 
-cada vuelta. Lo mismo aplica para el desgaste de frenos. 
-Para el cálculo del desgaste del motor se toma en cuenta la perdida de 
-potencia. 
-*/
+
+--Desgaste promedio de cada componente de cada auto por vuelta por 
+--circuito. 
+--Tener en cuenta que, para el cálculo del desgaste de los neumáticos, se 
+--toma la diferencia de mm del mismo entre la medición inicial y final de 
+--cada vuelta. Lo mismo aplica para el desgaste de frenos. 
+--Para el cálculo del desgaste del motor se toma en cuenta la perdida de 
+--potencia. 
+
 
 GO
 CREATE VIEW GRUPO_9800.desgasteDeComponentePorVuelta
@@ -800,3 +721,4 @@ GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo,caja_nro_serie,motor_nro_
 freno_nro_serie1,freno_nro_serie2,freno_nro_serie3,freno_nro_serie4
 GO
 
+*/
