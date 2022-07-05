@@ -500,7 +500,7 @@ BEGIN
 	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
 	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera  
 	WHERE e.cod_escuderia = pv.cod_escuderia 
-	AND GRUPO_9800.get_codigo_tiempo(carr.carrera_fecha) = t.cod_tiempo
+	AND t.cod_tiempo = GRUPO_9800.get_codigo_tiempo(carr.carrera_fecha)
 	GROUP BY pv.cod_escuderia,GRUPO_9800.get_codigo_tiempo(carr.carrera_fecha)) 'Tiempo promedio en parada de box'
 	FROM GRUPO_9800.parada_box_por_vehiculo pbv 
 	JOIN GRUPO_9800.parada_box pb ON (pbv.cod_parada_box = pb.cod_parada_box)
@@ -508,10 +508,16 @@ BEGIN
     JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
     JOIN GRUPO_9800.BI_circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
 	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
-	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio
+	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio,t.cuatrimestre
 
 
 END
+
+SELECT pv.cod_escuderia,AVG(p.parada_box_tiempo) 
+	FROM GRUPO_9800.parada_box p 
+	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
+	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera  
+	GROUP BY pv.cod_escuderia,YEAR(carr.carrera_fecha),
 
 select COUNT(pv.cod_parada_box) from grupo_9800.parada_box_por_vehiculo pv 
 JOIN GRUPO_9800.parada_box p ON pv.cod_parada_box = p.cod_parada_box 
@@ -571,7 +577,7 @@ AS
 BEGIN
 	
 	DECLARE @CODIGO INT
-	SET @CODIGO = (SELECT t.cod_tiempo FROM GRUPO_9800.BI_tiempo t WHERE YEAR(@Date) = t.anio AND GRUPO_9800.obtener_cuatrimestre(MONTH(@Date)) = t.cuatrimestre) 
+	SET @CODIGO = (SELECT t.cod_tiempo FROM GRUPO_9800.BI_tiempo t WHERE YEAR(@Date) = t.anio AND GRUPO_9800.obtener_cuatrimestre(@Date) = t.cuatrimestre) 
 	RETURN @CODIGO
 END  
 
