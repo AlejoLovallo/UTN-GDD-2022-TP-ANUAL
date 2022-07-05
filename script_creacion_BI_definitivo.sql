@@ -508,51 +508,76 @@ BEGIN
     JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
     JOIN GRUPO_9800.BI_circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
 	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
-	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio,t.cuatrimestre
-
+	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio
 
 END
-
+/*
 SELECT pv.cod_escuderia,AVG(p.parada_box_tiempo) 
 	FROM GRUPO_9800.parada_box p 
 	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
 	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera  
-	GROUP BY pv.cod_escuderia,YEAR(carr.carrera_fecha),
+	GROUP BY pv.cod_escuderia,YEAR(carr.carrera_fecha),GRUPO_9800.obtener_cuatrimestre(carr.carrera_fecha)
 
 select COUNT(pv.cod_parada_box) from grupo_9800.parada_box_por_vehiculo pv 
 JOIN GRUPO_9800.parada_box p ON pv.cod_parada_box = p.cod_parada_box 
 JOIN GRUPO_9800.carrera c ON  p.codigo_carrera = c.codigo_carrera
 GROUP BY c.circuito_codigo,pv.cod_escuderia,YEAR(c.carrera_fecha)
 ORDER BY pv.cod_escuderia,c.circuito_codigo
-
+*/
 -- Migracion Fact table incidentes 
 GO
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_3
 AS
 BEGIN
-    INSERT INTO GRUPO_9800.BI_INCIDENTES (CIRCUITO_CODIGO,ID_TIPO_SECTOR,COD_ESCUDERIA,CODIGO_INCIDENTE,INCIDENTES_TOTALES_POR_ANIO_POR_ESCUDERIA,COD_TIEMPO)
-    SELECT i.circuito_codigo,s.id_tipo_sector,ia.cod_escuderia,ia.cod_incidente,
-	(SELECT count(inc_a.cod_incidente) 
-	FROM GRUPO_9800.BI_incidente inc 
+    INSERT INTO GRUPO_9800.BI_fact_table_3 (circuito_codigo,id_tipo_sector,cod_escuderia,cod_tiempo,incidentes_totales,promedio_incidentes)
+    SELECT i.circuito_codigo,
+	ts.id_tipo_sector,
+	e.cod_escuderia,
+	t.cod_tiempo,
+	(SELECT COUNT(inc_a.cod_incidente) 
+	FROM GRUPO_9800.incidente inc 
 	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
 	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
 	WHERE YEAR(carr.carrera_fecha) = t.anio
-	AND inc_a.cod_escuderia = ia.cod_escuderia
-	GROUP BY YEAR(carr.carrera_fecha),inc_a.cod_escuderia) 'Incidentes totales',
-	t.cod_tiempo
+	AND inc.circuito_codigo = i.circuito_codigo
+	GROUP BY YEAR(carr.carrera_fecha),inc.circuito_codigo) 'Incidentes totales',
+	(SELECT COUNT(inc_a.cod_incidente)
+	FROM GRUPO_9800.incidente inc 
+	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
+	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
+	JOIN GRUPO_9800.sector se ON se.codigo_sector = inc.codigo_sector
+	WHERE t.anio = YEAR(carr.carrera_fecha)
+	AND se.id_tipo_sector = ts.id_tipo_sector
+	AND e.cod_escuderia = inc_a.cod_escuderia
+	GROUP BY  YEAR(carr.carrera_fecha),se.id_tipo_sector,inc_a.cod_escuderia) / (SELECT COUNT(inc_a.cod_incidente) 
+																				FROM GRUPO_9800.incidente inc 
+																				JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
+																				JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
+																				WHERE YEAR(carr.carrera_fecha) = t.anio
+																				AND inc_a.cod_escuderia = e.cod_escuderia
+																				GROUP BY YEAR(carr.carrera_fecha),inc_a.cod_escuderia) 'Promedio de incidentes'
 	FROM GRUPO_9800.BI_circuito c
-	JOIN GRUPO_9800.BI_incidente i ON c.circuito_codigo = i.circuito_codigo
+	JOIN GRUPO_9800.incidente i ON c.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.incidente_por_auto ia ON i.cod_incidente = ia.cod_incidente
+	JOIN GRUPO_9800.BI_escuderia e ON e.cod_escuderia = ia.cod_escuderia 
 	JOIN GRUPO_9800.sector s ON s.codigo_sector = i.codigo_sector AND s.circuito_codigo = i.circuito_codigo
+	JOIN GRUPO_9800.BI_tipo_sector ts ON s.id_tipo_sector = ts.id_tipo_sector 
 	JOIN GRUPO_9800.carrera ca ON i.codigo_carrera = ca.codigo_carrera
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio 
-    GROUP BY i.circuito_codigo,s.id_tipo_sector,ia.cod_escuderia,ia.cod_incidente, t.anio,t.cod_tiempo
+    GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo,t.anio
 END
 GO
+s
 
+select * from GRUPO_9800.incidente_por_auto IA 
+join GRUPO_9800.incidente I on IA.cod_incidente = I.cod_incidente
+order by circuito_codigo
 
-
-
+SELECT inc.circuito_codigo,COUNT(inc_a.cod_incidente),YEAR(carrera_fecha)
+	FROM GRUPO_9800.incidente inc 
+	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
+	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
+GROUP BY inc.circuito_codigo,YEAR(carrera_fecha)
 -- Tabla de tiempo
 
 CREATE FUNCTION GRUPO_9800.obtener_cuatrimestre (@Date smalldatetime )
