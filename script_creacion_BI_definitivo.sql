@@ -6,7 +6,9 @@ IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='FN
 	DROP FUNCTION GRUPO_9800.obtener_cuatrimestre
 GO
 
-
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='FN' AND NAME = 'get_codigo_tiempo' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP FUNCTION GRUPO_9800.get_codigo_tiempo
+GO
 --DROP PREVENTIVO DE VIEWS----------------------------------------------------------------
 
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='V' AND NAME = 'desgasteDeComponentePorVuelta' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
@@ -226,54 +228,22 @@ CREATE PROCEDURE [GRUPO_9800].CREATE_DIMENSION_TABLES
 AS
 BEGIN
 
+		/* Pendiente
 		CREATE TABLE GRUPO_9800.BI_tipo_neumatico (
 			id_tipo_neumatico smallint PRIMARY KEY,
 			detalle nvarchar(255)
 		);
-
-		CREATE TABLE GRUPO_9800.BI_neumatico (
-			neumatico_nro_serie NVARCHAR(255) PRIMARY KEY,
-			id_tipo_neumatico smallint 
-		);
-		 CREATE TABLE GRUPO_9800.BI_caja (
-            caja_nro_serie NVARCHAR(255) PRIMARY KEY,
-            caja_modelo NVARCHAR(50) ,
-        );
-    
-        CREATE TABLE GRUPO_9800.BI_motor (
-            motor_nro_serie NVARCHAR(255) PRIMARY KEY,
-            motor_modelo NVARCHAR(50) 
-        );
-    
-        CREATE TABLE GRUPO_9800.BI_freno (
-            freno_nro_serie NVARCHAR(255) PRIMARY KEY,
-            freno_tamanio_pastilla decimal(18,2) 
-        );
-	
-		CREATE TABLE GRUPO_9800.BI_piloto (
-            cod_piloto INT PRIMARY KEY,
-            piloto_nombre NVARCHAR(50) ,
-            piloto_apellido NVARCHAR(50) ,
-            piloto_nacionalidad NVARCHAR(50) ,
-            piloto_fecha_nacimiento DATETIME 
-        );
-	
+		
 		CREATE TABLE GRUPO_9800.BI_tipo_incidente (
             id_tipo_incidente smallint PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
+		*/
 
 		CREATE TABLE GRUPO_9800.BI_tipo_sector (
             id_tipo_sector smallint PRIMARY KEY,
             descripcion NVARCHAR(255) 
         );
-
-		CREATE TABLE GRUPO_9800.BI_parada_box (
-            cod_parada_box INT PRIMARY KEY,
-            parada_box_vuelta numeric(18,0),
-            parada_box_tiempo numeric(18,2),
-            codigo_carrera INT,
-		);
 
 		CREATE TABLE GRUPO_9800.BI_escuderia (
             cod_escuderia INT PRIMARY KEY,
@@ -287,15 +257,6 @@ BEGIN
             id_pais smallint,
         );
 
-		CREATE TABLE GRUPO_9800.BI_incidente(
-			cod_incidente INT PRIMARY KEY,
-			codigo_sector INT ,
-			circuito_codigo INT ,
-			codigo_carrera INT ,
-			tiempo_incidente decimal(18,2) ,
-			id_incidente_bandera INT ,
-		);
-
 		CREATE TABLE GRUPO_9800.BI_vehiculo (
             vehiculo_numero INT,
             vehiculo_modelo NVARCHAR(255),
@@ -303,6 +264,13 @@ BEGIN
             cod_piloto INT ,
             PRIMARY KEY (vehiculo_numero, cod_escuderia)
         );
+
+		 CREATE TABLE GRUPO_9800.BI_TIEMPO(
+            cod_tiempo INT IDENTITY PRIMARY KEY,
+            anio INT NOT NULL,
+			cuatrimestre INT NOT NULL
+        );
+
 END
 GO
 
@@ -313,67 +281,43 @@ CREATE PROCEDURE [GRUPO_9800].CREATE_BI_TABLES
 AS
 BEGIN
 		
-		 CREATE TABLE GRUPO_9800.BI_TIEMPO(
-            COD_TIEMPO INT IDENTITY PRIMARY KEY,
-            ANIO INT not null,
-			CUATRIMESTRE INT NOT NULL
-        );
-		CREATE TABLE GRUPO_9800.BI_CIRCUITO_VISTAS(
-            VEHICULO_NUMERO INT ,
-            COD_ESCUDERIA INT,
-            CIRCUITO_CODIGO INT,
-			COD_PILOTO INT,
-            MEJOR_TIEMPO_VUELTA NUMERIC(18,10),
-            MAXIMO_COMBUSTIBLE_CONSUMIDO DECIMAL(18,2),
-            VELOCIDAD DECIMAL(18,2),
-            ID_TIPO_SECTOR smallint,
-			COD_TIEMPO INT REFERENCES GRUPO_9800.BI_TIEMPO,
-			PRIMARY KEY(VEHICULO_NUMERO,COD_ESCUDERIA,CIRCUITO_CODIGO,ID_TIPO_SECTOR,COD_PILOTO,COD_TIEMPO),
-			FOREIGN KEY(VEHICULO_NUMERO,COD_ESCUDERIA) REFERENCES GRUPO_9800.VEHICULO
+		
+		CREATE TABLE GRUPO_9800.BI_fact_table_1(
+            circuito_codigo INT,
+			cod_escuderia INT,
+			vehiculo_numero INT,
+			id_tipo_sector SMALLINT,
+			cod_tiempo INT REFERENCES GRUPO_9800.BI_tiempo,
+			desgaste_caja_promedio DECIMAL(18,6),
+			potencia_motor_promedio NUMERIC(18,6),
+			desgaste_freno_promedio DECIMAL(18,6),
+			desgaste_neumatico_promedio DECIMAL(18,6),
+			consumo_combustible_promedio DECIMAL(18,6),
+			mejor_tiempo_de_vuelta NUMERIC(18,10),
+			maxima_velocidad_alcanzada DECIMAL(18,6)
+			PRIMARY KEY(circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo),
+			--Ver si van como FK
 		)
-
-        CREATE TABLE GRUPO_9800.BI_DESGASTE_VISTAS(
-			BI_ID_DESGASTE INT IDENTITY PRIMARY KEY,
-            NUMERO_VUELTA NUMERIC(18,0),
-            VEHICULO_NUMERO INT ,
-            COD_ESCUDERIA INT,
-            CIRCUITO_CODIGO INT REFERENCES GRUPO_9800.BI_CIRCUITO,
-			CAJA_NRO_SERIE NVARCHAR(255) REFERENCES GRUPO_9800.BI_CAJA,
-			MOTOR_NRO_SERIE NVARCHAR(255) REFERENCES GRUPO_9800.BI_MOTOR,
-			NEUMATICO_NRO_SERIE1 NVARCHAR(255),
-			NEUMATICO_NRO_SERIE2 NVARCHAR(255),
-			NEUMATICO_NRO_SERIE3 NVARCHAR(255),
-			NEUMATICO_NRO_SERIE4 NVARCHAR(255),
-			FRENO_NRO_SERIE1 NVARCHAR(255) REFERENCES GRUPO_9800.BI_FRENO,
-			FRENO_NRO_SERIE2 NVARCHAR(255) REFERENCES GRUPO_9800.BI_FRENO,
-			FRENO_NRO_SERIE3 NVARCHAR(255) REFERENCES GRUPO_9800.BI_FRENO,
-			FRENO_NRO_SERIE4 NVARCHAR(255) REFERENCES GRUPO_9800.BI_FRENO,
-            ID_TIPO_NEUMATICO smallint REFERENCES GRUPO_9800.BI_TIPO_NEUMATICO,
-			DESGASTE_CAJA NUMERIC (18,2),
-			POTENCIA_MOTOR NUMERIC(18,6),
-			DESGASTE_FRENO DECIMAL(18,2),
-			DESGASTE_NEUMATICO DECIMAL(18,6)
-			FOREIGN KEY(VEHICULO_NUMERO,COD_ESCUDERIA) REFERENCES GRUPO_9800.VEHICULO
-		);
  
-        CREATE TABLE GRUPO_9800.BI_PARADAS (
-            COD_ESCUDERIA INT REFERENCES GRUPO_9800.BI_ESCUDERIA,
-            CIRCUITO_CODIGO INT REFERENCES GRUPO_9800.BI_CIRCUITO,
-            COD_PARADA_BOX INT REFERENCES GRUPO_9800.BI_PARADA_BOX,
-            TIEMPO_PARADA_BOX NUMERIC(18,2),
-            COD_TIEMPO INT REFERENCES GRUPO_9800.BI_TIEMPO
-			PRIMARY KEY(COD_ESCUDERIA,CIRCUITO_CODIGO,COD_PARADA_BOX,COD_TIEMPO)
+        CREATE TABLE GRUPO_9800.BI_fact_table_2(
+            cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
+            circuito_codigo INT REFERENCES GRUPO_9800.BI_circuito,
+            cod_tiempo INT,
+            cantidad_paradas INT,
+            tiempo_consumido_parada_box DECIMAL(18,2),
+			tiempo_promedio_parada_box DECIMAL(18,2)
+			PRIMARY KEY(COD_ESCUDERIA,CIRCUITO_CODIGO,COD_TIEMPO)
 		);
-  
-        CREATE TABLE GRUPO_9800.BI_INCIDENTES (
-            CIRCUITO_CODIGO INT REFERENCES GRUPO_9800.BI_CIRCUITO,
-            ID_TIPO_SECTOR SMALLINT REFERENCES GRUPO_9800.BI_TIPO_SECTOR,
-            COD_ESCUDERIA INT REFERENCES GRUPO_9800.BI_ESCUDERIA,
-            CODIGO_INCIDENTE INT REFERENCES GRUPO_9800.BI_INCIDENTE,
-			INCIDENTES_TOTALES_POR_ANIO_POR_ESCUDERIA INT,
-            COD_TIEMPO INT REFERENCES GRUPO_9800.BI_TIEMPO
-			PRIMARY KEY(CIRCUITO_CODIGO,ID_TIPO_SECTOR,COD_ESCUDERIA,CODIGO_INCIDENTE,COD_TIEMPO)
-        );
+
+		 CREATE TABLE GRUPO_9800.BI_fact_table_3( 
+			circuito_codigo INT REFERENCES GRUPO_9800.BI_circuito,
+            id_tipo_sector INT REFERENCES GRUPO_9800.BI_tipo_sector,
+			cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
+			cod_tiempo INT,
+            incidentes_totales INT,
+            promedio_incidentes DECIMAL(18,2),
+			PRIMARY KEY(circuito_codigo,id_tipo_sector,cod_escuderia)
+		);
     
        
 END
@@ -390,7 +334,7 @@ BEGIN
 END
 GO
 -- BI Tipo de neumatico
-
+/*
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tipo_neumatico
 AS
 BEGIN
@@ -407,42 +351,6 @@ BEGIN
 END
 GO
 
--- BI Neumatico 
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_neumatico
-AS
-BEGIN
-	INSERT INTO GRUPO_9800.BI_neumatico
-	SELECT * FROM GRUPO_9800.neumatico
-END
-GO
-
--- BI Motor 
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_motor
-AS
-BEGIN
-	INSERT INTO GRUPO_9800.BI_motor
-	SELECT * FROM GRUPO_9800.motor
-END
-GO
-
--- BI Freno
-
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_freno
-AS
-BEGIN
-	INSERT INTO GRUPO_9800.BI_freno
-	SELECT * FROM GRUPO_9800.freno
-END
-GO
-
--- BI Caja
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_caja
-AS
-BEGIN
-	INSERT INTO GRUPO_9800.BI_caja
-	SELECT * FROM GRUPO_9800.caja
-END
-GO
 -- BI Tipo de incidente
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tipo_incidente
 AS
@@ -460,7 +368,7 @@ BEGIN
 	SELECT * FROM GRUPO_9800.incidente
 END
 GO
-
+*/
 -- BI Tipo de sector
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_tipo_sector
 AS
@@ -470,15 +378,7 @@ BEGIN
 	SELECT * FROM GRUPO_9800.tipo_sector
 END
 GO
--- BI Parada de box
-CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_parada_box
-AS
-BEGIN
 
-	INSERT INTO GRUPO_9800.BI_parada_box
-	SELECT * FROM GRUPO_9800.parada_box
-END
-GO
 -- BI Escuderia
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_escuderia
 AS
@@ -499,13 +399,42 @@ END
 GO
 
 
-
 /*MIGRACIÓN*/
 
--- Migracion tabla de hechos de incidentes
 GO
+-- Migracion fact table desgaste
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_1
+AS
+BEGIN
 
-CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_DESGASTE_VISTAS
+	INSERT INTO GRUPO_9800.BI_CIRCUITO_VISTAS (COD_ESCUDERIA,CIRCUITO_CODIGO,VEHICULO_NUMERO,COD_PILOTO,MEJOR_TIEMPO_VUELTA,MAXIMO_COMBUSTIBLE_CONSUMIDO,VELOCIDAD,ID_TIPO_SECTOR,COD_TIEMPO)
+	SELECT tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,v.cod_piloto,
+	(SELECT MIN(tele_auto_tiempo_vuelta) FROM GRUPO_9800.telemetria_auto ta
+	WHERE ta.cod_escuderia = tele.cod_escuderia 
+	AND ta.circuito_codigo = tele.circuito_codigo 
+	AND ta.tele_auto_tiempo_vuelta <> 0 
+	GROUP BY ta.cod_escuderia,ta.circuito_codigo) 'Minimo tiempo de vuelta por escuderia',
+	(SELECT SUM(tele_auto_combustible)/COUNT(vehiculo_numero) FROM GRUPO_9800.telemetria_auto WHERE circuito_codigo = tele.circuito_codigo GROUP BY circuito_codigo) 'Combustible promedio por circuito',
+	(SELECT MAX(ta.tele_auto_velocidad)
+	FROM GRUPO_9800.telemetria_auto ta
+	JOIN GRUPO_9800.sector se ON se.codigo_sector = ta.codigo_sector
+	WHERE ta.vehiculo_numero = tele.vehiculo_numero 
+	AND tele.cod_escuderia = ta.cod_escuderia 
+	AND s.id_tipo_sector = se.id_tipo_sector
+	AND tele.circuito_codigo = ta.circuito_codigo
+	GROUP BY ta.vehiculo_numero,ta.cod_escuderia,se.id_tipo_sector,ta.circuito_codigo) 'Velocidad maxima' ,
+	s.id_tipo_sector,
+	t.cod_tiempo
+	FROM GRUPO_9800.telemetria_auto tele
+	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector
+	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
+	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
+	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,v.cod_piloto
+	order by tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,v.cod_piloto
+END
+
+
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_1
 AS
 BEGIN
 
@@ -544,8 +473,55 @@ BEGIN
 END
 GO
 
+-- Migracion fact table paradas de box
+
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_2 --LISTO
+AS
+BEGIN
+    INSERT INTO GRUPO_9800.BI_fact_table_2 (cod_escuderia,circuito_codigo,cod_tiempo,cantidad_de_paradas,tiempo_consumido_parada_box,tiempo_promedio_parada_box) 
+	SELECT e.cod_escuderia, 
+	ci.circuito_codigo,
+	t.cod_tiempo,
+	(SELECT COUNT(p.cod_parada_box)
+	FROM GRUPO_9800.parada_box p 
+	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
+	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera 
+	WHERE YEAR(carr.carrera_fecha) = t.anio
+	AND carr.circuito_codigo = ci.circuito_codigo
+	AND pv.cod_escuderia = e.cod_escuderia
+	GROUP BY YEAR(carr.carrera_fecha),carr.circuito_codigo,pv.cod_escuderia) 'Cantidad de paradas de box',
+	(SELECT SUM(p.parada_box_tiempo) 
+	FROM GRUPO_9800.parada_box p 
+	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera   
+	WHERE ci.circuito_codigo = carr.circuito_codigo
+	GROUP BY carr.circuito_codigo) 'Tiempo consumido en parada de box' ,
+	(SELECT AVG(p.parada_box_tiempo) 
+	FROM GRUPO_9800.parada_box p 
+	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
+	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera  
+	WHERE e.cod_escuderia = pv.cod_escuderia 
+	AND GRUPO_9800.get_codigo_tiempo(carr.carrera_fecha) = t.cod_tiempo
+	GROUP BY pv.cod_escuderia,GRUPO_9800.get_codigo_tiempo(carr.carrera_fecha)) 'Tiempo promedio en parada de box'
+	FROM GRUPO_9800.parada_box_por_vehiculo pbv 
+	JOIN GRUPO_9800.parada_box pb ON (pbv.cod_parada_box = pb.cod_parada_box)
+    JOIN GRUPO_9800.BI_escuderia e ON (pbv.cod_escuderia = e.cod_escuderia)
+    JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
+    JOIN GRUPO_9800.BI_circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
+	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
+	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio
+
+
+END
+
+select COUNT(pv.cod_parada_box) from grupo_9800.parada_box_por_vehiculo pv 
+JOIN GRUPO_9800.parada_box p ON pv.cod_parada_box = p.cod_parada_box 
+JOIN GRUPO_9800.carrera c ON  p.codigo_carrera = c.codigo_carrera
+GROUP BY c.circuito_codigo,pv.cod_escuderia,YEAR(c.carrera_fecha)
+ORDER BY pv.cod_escuderia,c.circuito_codigo
+
+-- Migracion Fact table incidentes 
 GO
-CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_INCIDENTE
+CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_3
 AS
 BEGIN
     INSERT INTO GRUPO_9800.BI_INCIDENTES (CIRCUITO_CODIGO,ID_TIPO_SECTOR,COD_ESCUDERIA,CODIGO_INCIDENTE,INCIDENTES_TOTALES_POR_ANIO_POR_ESCUDERIA,COD_TIEMPO)
@@ -568,56 +544,8 @@ BEGIN
 END
 GO
 
--- Migracion tabla de hechos de Circuitos vistas
-
-CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_CIRCUITO_VISTAS
-AS
-BEGIN
-
-	INSERT INTO GRUPO_9800.BI_CIRCUITO_VISTAS (COD_ESCUDERIA,CIRCUITO_CODIGO,VEHICULO_NUMERO,COD_PILOTO,MEJOR_TIEMPO_VUELTA,MAXIMO_COMBUSTIBLE_CONSUMIDO,VELOCIDAD,ID_TIPO_SECTOR,COD_TIEMPO)
-	SELECT tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,v.cod_piloto,
-	(SELECT MIN(tele_auto_tiempo_vuelta) FROM GRUPO_9800.telemetria_auto ta
-	WHERE ta.cod_escuderia = tele.cod_escuderia 
-	AND ta.circuito_codigo = tele.circuito_codigo 
-	AND ta.tele_auto_tiempo_vuelta <> 0 
-	GROUP BY ta.cod_escuderia,ta.circuito_codigo) 'Minimo tiempo de vuelta por escuderia',
-	(SELECT SUM(tele_auto_combustible)/COUNT(vehiculo_numero) FROM GRUPO_9800.telemetria_auto WHERE circuito_codigo = tele.circuito_codigo GROUP BY circuito_codigo) 'Combustible promedio por circuito',
-	(SELECT MAX(ta.tele_auto_velocidad)
-	FROM GRUPO_9800.telemetria_auto ta
-	JOIN GRUPO_9800.sector se ON se.codigo_sector = ta.codigo_sector
-	WHERE ta.vehiculo_numero = tele.vehiculo_numero 
-	AND tele.cod_escuderia = ta.cod_escuderia 
-	AND s.id_tipo_sector = se.id_tipo_sector
-	AND tele.circuito_codigo = ta.circuito_codigo
-	GROUP BY ta.vehiculo_numero,ta.cod_escuderia,se.id_tipo_sector,ta.circuito_codigo) 'Velocidad maxima' ,
-	s.id_tipo_sector,
-	t.cod_tiempo
-	FROM GRUPO_9800.telemetria_auto tele
-	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector
-	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
-	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
-	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,v.cod_piloto
-	order by tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,v.cod_piloto
-END
 
 
---Migracion tabla de hechos paradas
-GO
-
-CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_PARADAS --LISTO
-AS
-BEGIN
-    INSERT INTO GRUPO_9800.BI_PARADAS (COD_ESCUDERIA,CIRCUITO_CODIGO,COD_PARADA_BOX,TIEMPO_PARADA_BOX,COD_TIEMPO)
-    SELECT e.cod_escuderia, ci.circuito_codigo, pbv.cod_parada_box,pb.parada_box_tiempo,t.cod_tiempo
-    FROM GRUPO_9800.parada_box_por_vehiculo pbv JOIN GRUPO_9800.parada_box pb ON (pbv.cod_parada_box = pb.cod_parada_box)
-                                             JOIN GRUPO_9800.escuderia e ON (pbv.cod_escuderia = e.cod_escuderia)
-                                             JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
-                                             JOIN GRUPO_9800.circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
-											 JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio
-																		AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
-	GROUP BY e.cod_escuderia, ci.circuito_codigo, pbv.cod_parada_box,pb.parada_box_tiempo,t.cod_tiempo
-END
-GO
 
 -- Tabla de tiempo
 
@@ -634,6 +562,17 @@ BEGIN
 	END
 
 	RETURN @CUATRIMESTRE
+END  
+
+GO
+CREATE FUNCTION GRUPO_9800.get_codigo_tiempo (@Date smalldatetime )
+RETURNS INT
+AS 
+BEGIN
+	
+	DECLARE @CODIGO INT
+	SET @CODIGO = (SELECT t.cod_tiempo FROM GRUPO_9800.BI_tiempo t WHERE YEAR(@Date) = t.anio AND GRUPO_9800.obtener_cuatrimestre(MONTH(@Date)) = t.cuatrimestre) 
+	RETURN @CODIGO
 END  
 
 GO
