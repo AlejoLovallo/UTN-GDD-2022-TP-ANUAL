@@ -224,6 +224,7 @@ BEGIN
 			vehiculo_numero INT,
 			id_tipo_sector SMALLINT,
 			cod_tiempo INT REFERENCES GRUPO_9800.BI_tiempo,
+			cantidad_de_vueltas INT ,
 			desgaste_caja_promedio DECIMAL(18,6),
 			potencia_motor_promedio NUMERIC(18,6),
 			desgaste_freno_promedio DECIMAL(18,6),
@@ -335,18 +336,51 @@ CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_telemetria
 AS
 BEGIN
 
-	INSERT INTO GRUPO_9800.BI_fact_table_telemetria (circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,
-											desgaste_caja_promedio,potencia_motor_promedio,desgaste_freno_promedio,desgaste_neumatico_promedio,
+	INSERT INTO GRUPO_9800.BI_fact_table_telemetria (circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cantidad_de_vueltas,
+											desgaste_caja_promedio,potencia_motor_promedio,desgaste_neumatico_promedio,desgaste_freno_promedio,
 											consumo_combustible_promedio,mejor_tiempo_de_vuelta,maxima_velocidad_alcanzada)
-	SELECT tele.circuito_codigo,tele.cod_escuderia,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,
-	SUM(tc.tele_caja_desgaste)/COUNT(tele.tele_auto_numero_vuelta),
-	SUM(tm.tele_motor_potencia)/COUNT(tele.tele_auto_numero_vuelta),
-	MAX(tn.tele_neumatico_profundidad) - MIN(tn.tele_neumatico_profundidad),
-	MAX(tf.tele_freno_grosor_pastilla) - MIN(tf.tele_freno_grosor_pastilla),
-	SUM(tele.tele_auto_combustible)/ (SELECT COUNT(tele.vehiculo_numero) 
-									FROM GRUPO_9800.telemetria_auto ta 
-									WHERE ta.vehiculo_numero = tele.vehiculo_numero AND tele.cod_escuderia = ta.cod_escuderia 
-									GROUP BY ta.vehiculo_numero,ta.cod_escuderia)  'Combustible promedio por circuito',
+	SELECT tele.circuito_codigo,tele.cod_escuderia,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,COUNT(DISTINCT tele.tele_auto_numero_vuelta),
+	(SELECT MAX(tele_c.tele_caja_desgaste) - MIN(tele_c.tele_caja_desgaste) 
+									FROM GRUPO_9800.telemetria_caja tele_c 
+									JOIN GRUPO_9800.telemetria_auto tele_a ON tele_c.tele_auto_cod = tele_a.tele_auto_cod
+									JOIN GRUPO_9800.BI_TIEMPO ti ON YEAR(tele_a.tele_fecha) = ti.anio  AND GRUPO_9800.obtener_cuatrimestre(tele_a.tele_fecha) = ti.cuatrimestre
+									WHERE tele_a.vehiculo_numero = tele.vehiculo_numero
+									AND tele_a.cod_escuderia = tele.cod_escuderia
+									AND tele_a.circuito_codigo = tele.circuito_codigo
+									GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo),
+	(SELECT MAX(tele_m.tele_motor_potencia) - MIN(tele_m.tele_motor_potencia) 
+									FROM GRUPO_9800.telemetria_motor tele_m 
+									JOIN GRUPO_9800.telemetria_auto tele_a ON tele_m.tele_auto_cod=tele_a.tele_auto_cod
+									JOIN GRUPO_9800.BI_TIEMPO ti ON YEAR(tele_a.tele_fecha) = ti.anio  AND GRUPO_9800.obtener_cuatrimestre(tele_a.tele_fecha) = ti.cuatrimestre
+									WHERE tele_a.vehiculo_numero = tele.vehiculo_numero
+									AND tele_a.cod_escuderia = tele.cod_escuderia
+									AND tele_a.circuito_codigo = tele.circuito_codigo
+									GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo),
+	(SELECT SUM([desgaste])/COUNT(*) FROM 
+							(SELECT [neumatico], ( SUM([maximo]) - SUM([minimo])) [desgaste] FROM (
+							SELECT neumatico_nro_serie[neumatico],MAX(tele_neumatico_profundidad) [maximo], MIN (tele_neumatico_profundidad) [minimo] 
+							FROM GRUPO_9800.telemetria_neumatico
+							GROUP BY neumatico_nro_serie) as asd GROUP BY [neumatico]) as neumaticos_desgaste
+	JOIN GRUPO_9800.telemetria_neumatico tele_n ON [neumatico] = neumatico_nro_serie
+	JOIN GRUPO_9800.telemetria_auto tele_a ON tele_n.tele_auto_cod=tele_a.tele_auto_cod
+	JOIN GRUPO_9800.BI_TIEMPO ti ON YEAR(tele_a.tele_fecha) = ti.anio  AND GRUPO_9800.obtener_cuatrimestre(tele_a.tele_fecha) = ti.cuatrimestre
+	WHERE tele_a.vehiculo_numero = tele.vehiculo_numero
+	AND tele_a.cod_escuderia = tele.cod_escuderia
+	AND tele_a.circuito_codigo = tele.circuito_codigo
+	GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo) ,
+	--MAX(tn.tele_neumatico_profundidad) - MIN(tn.tele_neumatico_profundidad) ,
+	(SELECT SUM([desgaste])/COUNT(*) FROM 
+							(SELECT [freno], ( SUM([maximo]) - SUM([minimo])) [desgaste] FROM (
+							SELECT freno_nro_serie [freno],MAX(tele_freno_grosor_pastilla) [maximo], MIN (tele_freno_grosor_pastilla) [minimo] 
+							FROM GRUPO_9800.telemetria_freno GROUP BY freno_nro_serie) as asd GROUP BY [freno]) as frenos_desgaste
+	JOIN GRUPO_9800.telemetria_freno tele_n ON [freno] = freno_nro_serie
+	JOIN GRUPO_9800.telemetria_auto tele_a ON tele_n.tele_auto_cod=tele_a.tele_auto_cod
+	JOIN GRUPO_9800.BI_TIEMPO ti ON YEAR(tele_a.tele_fecha) = ti.anio  AND GRUPO_9800.obtener_cuatrimestre(tele_a.tele_fecha) = ti.cuatrimestre
+	WHERE tele_a.vehiculo_numero = tele.vehiculo_numero
+	AND tele_a.cod_escuderia = tele.cod_escuderia
+	AND tele_a.circuito_codigo = tele.circuito_codigo
+	GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo) ,
+	AVG(tele.tele_auto_combustible) 'Combustible promedio utilizado',
 	MIN(tele.tele_auto_tiempo_vuelta) 'Minimo tiempo de vuelta por escuderia',
 	MAX(tele.tele_auto_velocidad) 'Velocidad maxima'
 	FROM GRUPO_9800.telemetria_auto tele
@@ -355,12 +389,49 @@ BEGIN
 	JOIN GRUPO_9800.telemetria_motor tm ON tele.tele_auto_cod = tm.tele_auto_cod
 	JOIN GRUPO_9800.telemetria_caja tc ON tele.tele_auto_cod = tc.tele_auto_cod
 	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector
+	JOIN GRUPO_9800.carrera ca ON ca.codigo_carrera = tele.codigo_carrera
 	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
 	WHERE tele.tele_auto_tiempo_vuelta <> 0 
 	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo
+
 END
 GO
+
+
+/*
+
+select t.cod_escuderia,t.circuito_codigo,t.vehiculo_numero 
+from GRUPO_9800.telemetria_auto t
+JOIN GRUPO_9800.telemetria_neumatico tn ON t.tele_auto_cod = tn.tele_auto_cod
+GROUP BY t.cod_escuderia,t.circuito_codigo,t.vehiculo_numero
+HAVING COUNT(tn.neumatico_nro_serie) > 1
+
+
+select * from GRUPO_9800.escuderia
+
+select * from GRUPO_9800.bi_fact_table_telemetria WHERE circuito_codigo = 1 AND vehiculo_numero = 1 AND cod_escuderia = 8
+
+
+SELECT (SUM([A]) - SUM([B])) / COUNT(*) / 21
+FROM (select neumatico_nro_serie,MAX(tele_neumatico_profundidad)[A], min(tele_neumatico_profundidad) [B] 
+from GRUPO_9800.telemetria_neumatico 
+WHERE neumatico_nro_serie = 'YOJ925683' 
+OR neumatico_nro_serie ='JAB945083' 
+OR neumatico_nro_serie ='XAG841367' 
+OR neumatico_nro_serie = 'UXG549123' 
+GROUP BY neumatico_nro_serie) AS b
+
+SELECT MAX(tm.tele_motor_potencia) - MIN(tm.tele_motor_potencia)
+FROM GRUPO_9800.telemetria_motor tm
+JOIN GRUPO_9800.telemetria_auto t ON t.tele_auto_cod = tm.tele_auto_cod 
+WHERE t.circuito_codigo = 1
+AND t.cod_escuderia = 8
+AND t.vehiculo_numero = 1
+GROUP BY t.circuito_codigo,
+ t.cod_escuderia 
+ ,t.vehiculo_numero 
+*/
 -- Migracion fact table desgaste
 /*
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_telemetria
@@ -405,29 +476,28 @@ GO
 
 
 -- Migracion fact table paradas de box
-
+go
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_paradas_de_box --LISTO
 AS
 BEGIN
     INSERT INTO GRUPO_9800.BI_fact_table_paradas_de_box (cod_escuderia,circuito_codigo,cod_tiempo,cantidad_de_paradas,tiempo_consumido_parada_box) 
 	SELECT pbv.cod_escuderia, 
-	ci.circuito_codigo,
-	GRUPO_9800.get_codigo_tiempo(ca.carrera_fecha),
-	COUNT(DISTINCT pbv.cod_parada_box) 'Cantidad de paradas de box',
-	SUM(pb.parada_box_tiempo)  'Tiempo consumido en parada de box'
-	FROM GRUPO_9800.parada_box_por_vehiculo pbv 
-	JOIN GRUPO_9800.parada_box pb ON (pbv.cod_parada_box = pb.cod_parada_box)
-    --JOIN GRUPO_9800.BI_escuderia e ON (pbv.cod_escuderia = e.cod_escuderia)
+	ca.circuito_codigo,
+	t.cod_tiempo,
+	COUNT(DISTINCT pb.cod_parada_box) 'Cantidad de paradas de box',
+	SUM(pb.parada_box_tiempo)/COUNT(pbv.cod_parada_box) 'Tiempo consumido en parada de box'
+	FROM GRUPO_9800.parada_box pb 
     JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
-    JOIN GRUPO_9800.BI_circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
-	GROUP BY pbv.cod_escuderia,ci.circuito_codigo,GRUPO_9800.get_codigo_tiempo(ca.carrera_fecha)
-
+	JOIN GRUPO_9800.parada_box_por_vehiculo pbv ON pbv.cod_parada_box = pb.cod_parada_box
+	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
+	GROUP BY cod_escuderia,ca.circuito_codigo,t.cod_tiempo
+	order by circuito_codigo
 END
 /*
 select * 
 from GRUPO_9800.parada_box	p
 JOIN GRUPO_9800.carrera c ON p.codigo_carrera = c.codigo_carrera
-JOIN GRUPO_9800.parada_box_por_vehiculo pv on p.cod_parada_box = pv.cod_parada_box
+
 ORDER BY circuito_codigo
 */
 -- Migracion fact table incidentes
@@ -622,10 +692,10 @@ FROM GRUPO_9800.parada_box p
 JOIN GRUPO_9800.parada_box_por_vehiculo pv ON pv.cod_parada_box=p.cod_parada_box 
 JOIN GRUPO_9800.carrera ca ON p.codigo_carrera = ca.codigo_carrera GROUP BY ca.circuito_codigo
 
-SELECT ca.circuito_codigo,p.parada_box_tiempo 
+SELECT ca.circuito_codigo,sum(p.parada_box_tiempo)
 FROM GRUPO_9800.parada_box p 
-JOIN GRUPO_9800.parada_box_por_vehiculo pv ON pv.cod_parada_box=p.cod_parada_box 
-JOIN GRUPO_9800.carrera ca ON p.codigo_carrera = ca.codigo_carrera GROUP BY ca.circuito_codigo,p.parada_box_tiempo
+JOIN GRUPO_9800.carrera ca ON p.codigo_carrera = ca.codigo_carrera 
+GROUP BY ca.circuito_codigo
 */
 
 /*
@@ -692,15 +762,31 @@ AS
 GO
 CREATE VIEW GRUPO_9800.desgasteDeComponentePorVuelta
 AS
-SELECT vehiculo_numero,cod_escuderia,circuito_codigo,caja_nro_serie,motor_nro_serie,neumatico_nro_serie1,neumatico_nro_serie2,neumatico_nro_serie3,neumatico_nro_serie4,
-freno_nro_serie1,freno_nro_serie2,freno_nro_serie3,freno_nro_serie4,
-MAX(desgaste_caja) - MIN (desgaste_caja) / COUNT(distinct numero_vuelta) 'Desgaste promedio de la caja por auto por vuelta por circuito',
-MAX(potencia_motor) - MIN (potencia_motor) / COUNT(distinct numero_vuelta) 'Desgaste promedio del motor por auto por vuelta por circuito',
-(MAX(desgaste_neumatico) - MIN(desgaste_neumatico))/ (4 * COUNT(DISTINCT numero_vuelta)) 'Desgaste promedio de la neumatico por vuelta por circuito',
-(MAX(desgaste_freno) - MIN(desgaste_freno))/ (4 * COUNT(DISTINCT desgaste_freno)) 'Desgaste promedio del freno por auto por vuelta por circuito' 
-FROM GRUPO_9800.BI_DESGASTE_VISTAS
-GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo,caja_nro_serie,motor_nro_serie,neumatico_nro_serie1,neumatico_nro_serie2,neumatico_nro_serie3,neumatico_nro_serie4,
-freno_nro_serie1,freno_nro_serie2,freno_nro_serie3,freno_nro_serie4
+SELECT vehiculo_numero,cod_escuderia,circuito_codigo,
+
+desgaste_neumatico_promedio / cantidad_de_vueltas 'Desgaste promedio de la neumatico por vuelta por circuito',
+desgaste_freno_promedio / cantidad_de_vueltas 'Desgaste promedio del freno por auto por vuelta por circuito' 
+FROM GRUPO_9800.BI_fact_table_telemetria
+GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo
+order by circuito_codigo
+
 GO
 
 */
+
+SELECT vehiculo_numero,cod_escuderia,circuito_codigo,
+SUM(desgaste_caja_promedio / cantidad_de_vueltas)/ (COUNT(*))  'Desgaste promedio de la caja por auto por vuelta por circuito',
+SUM(potencia_motor_promedio / cantidad_de_vueltas)/ (COUNT(*))'Desgaste promedio del motor por auto por vuelta por circuito',
+SUM(desgaste_neumatico_promedio/cantidad_de_vueltas) / (COUNT(*)) 'Desgaste promedio de la neumatico por vuelta por circuito',
+SUM(desgaste_freno_promedio/cantidad_de_vueltas) /(COUNT(*))'Desgaste promedio del freno por auto por vuelta por circuito' 
+FROM GRUPO_9800.BI_fact_table_telemetria
+GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo
+order by circuito_codigo,vehiculo_numero,cod_escuderia
+
+/*
+select sum(desgaste_neumatico_promedio)/21
+
+FROM GRUPO_9800.BI_fact_table_telemetria
+
+WHERE cod_escuderia = 8 AND circuito_codigo = 1
+group by vehiculo_numero,circuito_codigo,cod_escuderia*/
