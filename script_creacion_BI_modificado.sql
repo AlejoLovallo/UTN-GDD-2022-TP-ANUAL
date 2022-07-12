@@ -14,7 +14,9 @@ IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='FN
 	DROP FUNCTION GRUPO_9800.obtener_anio
 GO
 
-
+IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='FN' AND NAME = 'IsZero' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
+	DROP FUNCTION GRUPO_9800.IsZero
+GO
 --DROP PREVENTIVO DE VIEWS----------------------------------------------------------------
 
 IF EXISTS (SELECT SCHEMA_NAME (SCHEMA_ID), NAME FROM SYS.objects WHERE TYPE ='V' AND NAME = 'desgasteDeComponentePorVuelta' AND SCHEMA_NAME(SCHEMA_ID) = 'GRUPO_9800')
@@ -253,6 +255,7 @@ BEGIN
 			vehiculo_numero INT,
 			id_tipo_sector SMALLINT ,
 			cod_tiempo INT ,
+			cod_piloto INT,
 			cantidad_de_vueltas INT,
 			desgaste_caja_promedio DECIMAL(18,6),
 			potencia_motor_promedio NUMERIC(18,6),
@@ -284,7 +287,8 @@ BEGIN
 			circuito_codigo INT REFERENCES GRUPO_9800.BI_circuito,
             id_tipo_sector SMALLINT REFERENCES GRUPO_9800.BI_tipo_sector,
 			cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
-			cod_tiempo INT,
+			cod_tiempo INT REFERENCES GRUPO_9800.BI_tiempo,
+			tipo_incidente SMALLINT REFERENCES GRUPO_9800.BI_tipo_incidente,
             incidentes_totales INT,
 			PRIMARY KEY(circuito_codigo,id_tipo_sector,cod_escuderia,cod_tiempo)
 		);
@@ -412,6 +416,54 @@ BEGIN
 			ajuste_cambio_de_sector DECIMAL(18,6), 
 			PRIMARY KEY(pk_temporal)
 		);
+
+		CREATE TABLE GRUPO_9800.BI_temp_desgaste_caja( 
+			pk_temporal smallint identity,
+			caja_nro_serie NVARCHAR(255),
+			tipo_de_sector smallint,
+			desgaste  DECIMAL(18,6),
+			PRIMARY KEY(pk_temporal)
+		);
+		CREATE TABLE GRUPO_9800.BI_temp_desgaste_motor( 
+			pk_temporal smallint identity,
+			motor_nro_serie NVARCHAR(255),
+			tipo_de_sector smallint,
+			desgaste  DECIMAL(18,6),
+			PRIMARY KEY(pk_temporal)
+		);
+
+	CREATE TABLE GRUPO_9800.BI_temp_desgaste_neumatico( 
+			pk_temporal smallint identity,
+			neumatico_nro_serie NVARCHAR(255),
+			tipo_de_sector smallint,
+			desgaste  DECIMAL(18,6),
+			PRIMARY KEY(pk_temporal)
+		);
+		CREATE TABLE GRUPO_9800.BI_temp_desgaste_freno( 
+			pk_temporal smallint identity,
+			freno_nro_serie NVARCHAR(255),
+			tipo_de_sector smallint,
+			desgaste  DECIMAL(18,6),
+			PRIMARY KEY(pk_temporal)
+		);
+	CREATE TABLE GRUPO_9800.BI_temp_consumo_combustible( 
+			pk_temporal smallint identity,
+			motor_nro_serie NVARCHAR(255),
+			tipo_de_sector smallint,
+			consumo  DECIMAL(18,6),
+			PRIMARY KEY(pk_temporal)
+		);
+
+	CREATE TABLE GRUPO_9800.BI_temp_tiempo_de_vuelta(
+			pk_temporal smallint identity,
+			circuito_codigo INT,
+			cod_escuderia INT,
+			vehiculo_numero INT,
+			tele_auto_numero_vuelta NUMERIC(18,0),
+			cod_tiempo int,
+			tiempo_de_vuelta NUMERIC(18,10)
+	);
+
 END
 
 GO
@@ -434,17 +486,17 @@ BEGIN
 		GROUP BY neumatico_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [neumatico],[tipo_sector]
 
 	INSERT INTO GRUPO_9800.BI_temp_frenos (freno_nro_serie ,tipo_de_sector ,desgaste ,ajuste_cambio_de_sector)
-	SELECT [freno],[tipo_sector] ,( SUM([maximo] - [minimo])) [desgaste], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
+	SELECT [freno],[tipo_sector] ,( SUM([maximo] - [minimo])) [desgaste], [numero_vuelta], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
 																			SELECT freno_nro_serie [_freno],MAX(tele_freno_grosor_pastilla) [maximo], MIN (tele_freno_grosor_pastilla) [minimo] 
 																			FROM GRUPO_9800.telemetria_freno
 																			GROUP BY freno_nro_serie) as aux WHERE [_freno] = [freno] GROUP BY [_freno]
 																			)
 	FROM (
-							SELECT freno_nro_serie [freno],sect.codigo_sector [sector],id_tipo_sector[tipo_sector],tt.circuito_codigo,tele_auto_numero_vuelta,MAX(tele_freno_grosor_pastilla) [maximo], MIN (tele_freno_grosor_pastilla) [minimo] 
+							SELECT freno_nro_serie [freno],sect.codigo_sector [sector],id_tipo_sector[tipo_sector],tt.circuito_codigo,tele_auto_numero_vuelta [numero_vuelta],MAX(tele_freno_grosor_pastilla) [maximo], MIN (tele_freno_grosor_pastilla) [minimo] 
 							FROM GRUPO_9800.telemetria_freno t
 							JOIN GRUPO_9800.telemetria_auto tt ON t.tele_auto_cod = tt.tele_auto_cod 
 							JOIN GRUPO_9800.sector sect ON sect.codigo_sector = tt.codigo_sector
-							GROUP BY freno_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [freno],[tipo_sector]
+							GROUP BY freno_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [freno],[tipo_sector],[numero_vuelta]
 
 	INSERT INTO GRUPO_9800.BI_temp_caja (caja_nro_serie,tipo_de_sector ,desgaste ,ajuste_cambio_de_sector)
 	SELECT [caja],[tipo_sector] ,( SUM([maximo] - [minimo])) [desgaste], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
@@ -460,17 +512,17 @@ BEGIN
 							GROUP BY caja_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [caja],[tipo_sector]
 	
 	INSERT INTO GRUPO_9800.BI_temp_motor(motor_nro_serie,tipo_de_sector ,desgaste ,ajuste_cambio_de_sector)
-	SELECT [motor],[tipo_sector] ,( SUM([maximo] - [minimo])) [desgaste], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
+	SELECT [motor] ,[tipo_sector]  ,( SUM([maximo] - [minimo])) [desgaste], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
 																			SELECT motor_nro_serie [_motor],MAX(tele_motor_potencia) [maximo], MIN (tele_motor_potencia) [minimo] 
 																			FROM GRUPO_9800.telemetria_motor
 																			GROUP BY motor_nro_serie) as aux WHERE [_motor]= [motor] GROUP BY [_motor]
-																			)
+																			) [ajuste_cambio_de_sector]
 	FROM (
 							SELECT motor_nro_serie [motor],sect.codigo_sector [sector],id_tipo_sector[tipo_sector],tt.circuito_codigo,tele_auto_numero_vuelta,MAX(tele_motor_potencia) [maximo], MIN (tele_motor_potencia) [minimo] 
 							FROM GRUPO_9800.telemetria_motor t
 							JOIN GRUPO_9800.telemetria_auto tt ON t.tele_auto_cod = tt.tele_auto_cod 
 							JOIN GRUPO_9800.sector sect ON sect.codigo_sector = tt.codigo_sector
-							GROUP BY motor_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [motor],[tipo_sector]
+							GROUP BY motor_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [motor],[tipo_sector] 
 	
 	INSERT INTO GRUPO_9800.BI_temp_combustible(motor_nro_serie,tipo_de_sector ,consumo ,ajuste_cambio_de_sector)
 	SELECT [motor],[tipo_sector] ,( SUM([maximo] - [minimo])) [desgaste], (SELECT  ( SUM([maximo] -[minimo])) [desgaste] FROM (
@@ -485,6 +537,35 @@ BEGIN
 							JOIN GRUPO_9800.telemetria_auto tt ON t.tele_auto_cod = tt.tele_auto_cod 
 							JOIN GRUPO_9800.sector sect ON sect.codigo_sector = tt.codigo_sector
 							GROUP BY motor_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector) as aux GROUP BY [motor],[tipo_sector]
+	
+	INSERT INTO GRUPO_9800.BI_temp_tiempo_de_vuelta (circuito_codigo,cod_escuderia,vehiculo_numero,tele_auto_numero_vuelta,cod_tiempo,tiempo_de_vuelta)
+	SELECT circuito_codigo,cod_escuderia,vehiculo_numero,tele_auto_numero_vuelta,cod_tiempo,MAX(tele_auto_tiempo_vuelta)
+	FROM GRUPO_9800.telemetria_auto ta 
+	JOIN GRUPO_9800.BI_tiempo ON YEAR(tele_fecha) = anio  AND GRUPO_9800.obtener_cuatrimestre(tele_fecha) = cuatrimestre
+	where tele_auto_tiempo_vuelta <> 0
+	GROUP BY circuito_codigo,cod_escuderia,vehiculo_numero,tele_auto_numero_vuelta,cod_tiempo		
+	
+	INSERT INTO GRUPO_9800.BI_temp_desgaste_caja(caja_nro_serie,tipo_de_sector,desgaste)
+	SELECT caja_nro_serie,tipo_de_sector, desgaste * (ajuste_cambio_de_sector / (SELECT SUM(desgaste) FROM GRUPO_9800.BI_temp_caja WHERE caja_nro_serie = tc.caja_nro_serie))
+	FROM GRUPO_9800.BI_temp_caja tc
+																		
+	INSERT INTO GRUPO_9800.BI_temp_desgaste_motor(motor_nro_serie,tipo_de_sector,desgaste)
+	SELECT motor_nro_serie,tipo_de_sector, desgaste * (ajuste_cambio_de_sector / (SELECT SUM(desgaste) FROM GRUPO_9800.BI_temp_motor WHERE motor_nro_serie = tc.motor_nro_serie))
+	FROM GRUPO_9800.BI_temp_motor tc
+														
+	INSERT INTO GRUPO_9800.BI_temp_desgaste_freno(freno_nro_serie,tipo_de_sector,desgaste)
+	SELECT freno_nro_serie,tipo_de_sector, desgaste * (ajuste_cambio_de_sector / GRUPO_9800.IsZero((SELECT SUM(desgaste) FROM GRUPO_9800.BI_temp_frenos WHERE freno_nro_serie = tc.freno_nro_serie),1))
+	FROM GRUPO_9800.BI_temp_frenos tc
+
+
+	INSERT INTO GRUPO_9800.BI_temp_desgaste_neumatico(neumatico_nro_serie,tipo_de_sector,desgaste)
+	SELECT neumatico_nro_serie,tipo_de_sector, desgaste * (ajuste_cambio_de_sector / (SELECT SUM(desgaste) FROM GRUPO_9800.BI_temp_neumaticos WHERE neumatico_nro_serie = tc.neumatico_nro_serie))
+	FROM GRUPO_9800.BI_temp_neumaticos tc
+
+	INSERT INTO GRUPO_9800.BI_temp_consumo_combustible(motor_nro_serie,tipo_de_sector,consumo)
+	SELECT motor_nro_serie,tipo_de_sector, consumo * (ajuste_cambio_de_sector / (SELECT SUM(consumo) FROM GRUPO_9800.BI_temp_combustible WHERE motor_nro_serie = tc.motor_nro_serie))
+	FROM GRUPO_9800.BI_temp_combustible tc
+
 END
 
 GO 
@@ -497,7 +578,12 @@ BEGIN
 	DROP TABLE GRUPO_9800.BI_temp_caja
 	DROP TABLE GRUPO_9800.BI_temp_motor
 	DROP TABLE GRUPO_9800.BI_temp_combustible
-			
+	DROP TABLE GRUPO_9800.BI_temp_tiempo_de_vuelta
+	DROP TABLE GRUPO_9800.BI_temp_desgaste_caja
+	DROP TABLE GRUPO_9800.BI_temp_desgaste_motor
+	DROP TABLE GRUPO_9800.BI_temp_desgaste_freno
+	DROP TABLE GRUPO_9800.BI_temp_desgaste_neumatico
+	DROP TABLE GRUPO_9800.BI_temp_consumo_combustible
 
 END
 /*MIGRACIÓN*/
@@ -510,11 +596,11 @@ AS
 BEGIN
 
 	
-	INSERT INTO GRUPO_9800.BI_fact_table_telemetria (circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cantidad_de_vueltas,
+	INSERT INTO GRUPO_9800.BI_fact_table_telemetria (circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cod_piloto,cantidad_de_vueltas,
 											desgaste_caja_promedio,potencia_motor_promedio,desgaste_neumatico_promedio,desgaste_freno_promedio,
 											consumo_combustible_promedio,mejor_tiempo_de_vuelta,maxima_velocidad_alcanzada)
-	SELECT tele.circuito_codigo,tele.cod_escuderia,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,COUNT(DISTINCT tele.tele_auto_numero_vuelta),
-	(SELECT temp_c.desgaste FROM GRUPO_9800.BI_temp_caja temp_c
+	SELECT tele.circuito_codigo,tele.cod_escuderia,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto,COUNT(DISTINCT tele.tele_auto_numero_vuelta),
+	(SELECT temp_c.desgaste FROM GRUPO_9800.BI_temp_desgaste_caja temp_c
 					JOIN GRUPO_9800.telemetria_caja tele_c ON tele_c.caja_nro_serie = temp_c.caja_nro_serie
 					JOIN GRUPO_9800.telemetria_auto tele_a ON tele_c.tele_auto_cod = tele_a.tele_auto_cod
 					JOIN GRUPO_9800.sector sec ON tele_a.codigo_sector = sec.codigo_sector
@@ -525,7 +611,7 @@ BEGIN
 					AND s.id_tipo_sector = temp_c.tipo_de_sector
 					AND sec.id_tipo_sector = temp_c.tipo_de_sector
 					GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo,temp_c.desgaste),
-	(SELECT temp_m.desgaste FROM BI_temp_motor temp_m
+	(SELECT temp_m.desgaste FROM BI_temp_desgaste_motor temp_m
 					JOIN GRUPO_9800.telemetria_motor tele_m ON temp_m.motor_nro_serie = tele_m.motor_nro_serie
 					JOIN GRUPO_9800.telemetria_auto tele_a ON tele_m.tele_auto_cod=tele_a.tele_auto_cod
 					JOIN GRUPO_9800.sector sec ON tele_a.codigo_sector = sec.codigo_sector
@@ -536,7 +622,7 @@ BEGIN
 					AND s.id_tipo_sector = temp_m.tipo_de_sector
 					AND sec.id_tipo_sector = temp_m.tipo_de_sector
 					GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo,temp_m.desgaste),
-	(SELECT AVG(temp_n.desgaste) FROM BI_temp_neumaticos temp_n
+	(SELECT AVG(temp_n.desgaste) FROM BI_temp_desgaste_neumatico temp_n
 					JOIN GRUPO_9800.telemetria_neumatico tele_n ON temp_n.neumatico_nro_serie= tele_n.neumatico_nro_serie
 					JOIN GRUPO_9800.telemetria_auto tele_a ON tele_n.tele_auto_cod=tele_a.tele_auto_cod
 					JOIN GRUPO_9800.sector sec ON tele_a.codigo_sector = sec.codigo_sector
@@ -547,7 +633,7 @@ BEGIN
 					AND s.id_tipo_sector =	temp_n.tipo_de_sector
 					AND sec.id_tipo_sector = temp_n.tipo_de_sector
 					GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo,sec.id_tipo_sector) ,
-	(SELECT AVG(temp_f.desgaste) FROM BI_temp_frenos temp_f
+	(SELECT AVG(temp_f.desgaste) FROM BI_temp_desgaste_freno temp_f
 					JOIN GRUPO_9800.telemetria_freno tele_n ON temp_f.freno_nro_serie = tele_n.freno_nro_serie
 					JOIN GRUPO_9800.telemetria_auto tele_a ON tele_n.tele_auto_cod=tele_a.tele_auto_cod
 					JOIN GRUPO_9800.sector sec ON tele_a.codigo_sector = sec.codigo_sector
@@ -558,7 +644,7 @@ BEGIN
 					AND s.id_tipo_sector = temp_f.tipo_de_sector
 					AND sec.id_tipo_sector = temp_f.tipo_de_sector
 					GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo,sec.id_tipo_sector) ,
-	(SELECT temp_c.consumo FROM BI_temp_combustible temp_c
+	(SELECT temp_c.consumo FROM BI_temp_consumo_combustible temp_c
 					JOIN GRUPO_9800.telemetria_motor tele_m ON temp_c.motor_nro_serie = tele_m.motor_nro_serie
 					JOIN GRUPO_9800.telemetria_auto tele_a ON tele_m.tele_auto_cod=tele_a.tele_auto_cod
 					JOIN GRUPO_9800.sector sec ON tele_a.codigo_sector = sec.codigo_sector
@@ -569,19 +655,25 @@ BEGIN
 					AND s.id_tipo_sector = temp_c.tipo_de_sector
 					AND sec.id_tipo_sector = temp_c.tipo_de_sector
 					GROUP BY tele_a.vehiculo_numero,tele_a.cod_escuderia,tele_a.circuito_codigo,ti.cod_tiempo,sec.id_tipo_sector,temp_c.consumo) 'Combustible utilizado',
-	MAX(tele.tele_auto_tiempo_vuelta) 'Tiempo de vuelta',
+	(SELECT MIN(tiempo_de_vuelta) 
+			FROM GRUPO_9800.BI_temp_tiempo_de_vuelta temp_t
+			WHERE tele.cod_escuderia =  temp_t.cod_escuderia
+			AND tele.circuito_codigo = temp_t.circuito_codigo
+			AND tele.vehiculo_numero = temp_t.vehiculo_numero
+			AND t.cod_tiempo = temp_t.cod_tiempo) 'Tiempo de vuelta',
 	MAX(tele.tele_auto_velocidad) 'Velocidad maxima'
 	FROM GRUPO_9800.telemetria_auto tele
 	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector
 	JOIN GRUPO_9800.carrera ca ON ca.codigo_carrera = tele.codigo_carrera
 	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
+	JOIN GRUPO_9800.BI_piloto p ON v.cod_piloto = p.cod_piloto
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
-	WHERE tele.tele_auto_tiempo_vuelta <> 0 
-	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo
+	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto
 
 
 END
 GO
+
 /*
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_telemetria
 AS
@@ -694,47 +786,7 @@ GROUP BY t.circuito_codigo,
  t.cod_escuderia 
  ,t.vehiculo_numero 
 */
--- Migracion fact table desgaste
-/*
-CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_telemetria
-AS
-BEGIN
 
-	INSERT INTO GRUPO_9800.BI_DESGASTE_VISTAS
-	(VEHICULO_NUMERO,COD_ESCUDERIA,CIRCUITO_CODIGO,NEUMATICO_NRO_SERIE1,NEUMATICO_NRO_SERIE2,NEUMATICO_NRO_SERIE3,NEUMATICO_NRO_SERIE4,
-	FRENO_NRO_SERIE1,FRENO_NRO_SERIE2,FRENO_NRO_SERIE3,FRENO_NRO_SERIE4,CAJA_NRO_SERIE,MOTOR_NRO_SERIE,
-	NUMERO_VUELTA,DESGASTE_CAJA,DESGASTE_NEUMATICO,DESGASTE_FRENO,POTENCIA_MOTOR)
-	SELECT  
-	v.vehiculo_numero,
-	v.cod_escuderia,
-	circ.circuito_codigo,
-	(SELECT neumatico_nro_serie FROM GRUPO_9800.telemetria_neumatico WHERE ta.tele_auto_cod = tele_auto_cod AND tele_neumatico_posicion = 'Delantero Izquierdo'),
-	(SELECT neumatico_nro_serie FROM GRUPO_9800.telemetria_neumatico WHERE ta.tele_auto_cod = tele_auto_cod AND tele_neumatico_posicion = 'Delantero Derecho'),
-	(SELECT neumatico_nro_serie FROM GRUPO_9800.telemetria_neumatico WHERE ta.tele_auto_cod = tele_auto_cod AND tele_neumatico_posicion = 'Trasero Izquierdo'),
-	(SELECT neumatico_nro_serie FROM GRUPO_9800.telemetria_neumatico WHERE ta.tele_auto_cod = tele_auto_cod AND tele_neumatico_posicion = 'Trasero Derecho'),
-	(SELECT freno_nro_serie FROM GRUPO_9800.telemetria_freno WHERE ta.tele_auto_cod = tele_auto_cod AND tele_freno_posicion= 'Delantero Izquierdo'),
-	(SELECT freno_nro_serie FROM GRUPO_9800.telemetria_freno WHERE ta.tele_auto_cod = tele_auto_cod AND tele_freno_posicion = 'Delantero Derecho'),
-	(SELECT freno_nro_serie FROM GRUPO_9800.telemetria_freno WHERE ta.tele_auto_cod = tele_auto_cod AND tele_freno_posicion = 'Trasero Izquierdo'),
-	(SELECT freno_nro_serie FROM GRUPO_9800.telemetria_freno WHERE ta.tele_auto_cod = tele_auto_cod AND tele_freno_posicion = 'Trasero Derecho'),
-	(SELECT caja_nro_serie FROM GRUPO_9800.telemetria_caja WHERE ta.tele_auto_cod = tele_auto_cod GROUP BY caja_nro_serie),
-	(SELECT motor_nro_serie FROM GRUPO_9800.telemetria_motor WHERE ta.tele_auto_cod = tele_auto_cod GROUP BY motor_nro_serie),
-	ta.tele_auto_numero_vuelta,
-	(SELECT tele_caja_desgaste FROM GRUPO_9800.telemetria_caja WHERE ta.tele_auto_cod = tele_auto_cod),
-	(SELECT SUM(tele_neumatico_profundidad) FROM GRUPO_9800.telemetria_neumatico WHERE ta.tele_auto_cod = tele_auto_cod),
-	(SELECT SUM(tele_freno_grosor_pastilla) FROM GRUPO_9800.telemetria_freno WHERE ta.tele_auto_cod = tele_auto_cod),
-	(SELECT tele_motor_potencia FROM GRUPO_9800.telemetria_motor WHERE ta.tele_auto_cod = tele_auto_cod)
-	FROM GRUPO_9800.telemetria_auto ta
-	JOIN GRUPO_9800.BI_vehiculo v ON v.cod_escuderia = ta.cod_escuderia AND v.vehiculo_numero = ta.vehiculo_numero	
-	JOIN GRUPO_9800.BI_circuito circ ON circ.circuito_codigo = ta.circuito_codigo
-	GROUP BY ta.tele_auto_cod,
-	v.vehiculo_numero,
-	v.cod_escuderia,
-	circ.circuito_codigo,
-	ta.tele_auto_numero_vuelta
-
-END
-GO
-*/
 
 
 -- Migracion fact table paradas de box
@@ -749,7 +801,7 @@ BEGIN
 	COUNT(DISTINCT pb.cod_parada_box) 'Cantidad de paradas de box',
 	SUM(pb.parada_box_tiempo/4) 'Tiempo consumido en parada de box'
 	FROM GRUPO_9800.parada_box pb 
-    left JOIN GRUPO_9800.parada_box_por_vehiculo pbv ON pbv.cod_parada_box = pb.cod_parada_box
+    JOIN GRUPO_9800.parada_box_por_vehiculo pbv ON pbv.cod_parada_box = pb.cod_parada_box
 	JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
 	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
 	GROUP BY cod_escuderia,ca.circuito_codigo,t.cod_tiempo
@@ -768,23 +820,26 @@ GO
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_incidentes
 AS
 BEGIN
-    INSERT INTO GRUPO_9800.BI_fact_table_incidentes (circuito_codigo,id_tipo_sector,cod_escuderia,cod_tiempo,incidentes_totales)
+    INSERT INTO GRUPO_9800.BI_fact_table_incidentes (circuito_codigo,id_tipo_sector,cod_escuderia,cod_tiempo,tipo_incidente,incidentes_totales)
     SELECT i.circuito_codigo,
 	ts.id_tipo_sector,
 	e.cod_escuderia,
 	t.cod_tiempo,
+	ti.id_tipo_incidente,
 	COUNT(ia.cod_incidente) 'Incidentes totales'
 	FROM GRUPO_9800.BI_circuito c
 	JOIN GRUPO_9800.incidente i ON c.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.incidente_por_auto ia ON i.cod_incidente = ia.cod_incidente
+	JOIN GRUPO_9800.BI_tipo_incidente ti ON ti.id_tipo_incidente = ia.id_tipo_incidente
 	JOIN GRUPO_9800.BI_escuderia e ON e.cod_escuderia = ia.cod_escuderia 
 	JOIN GRUPO_9800.sector s ON s.codigo_sector = i.codigo_sector AND s.circuito_codigo = i.circuito_codigo
 	JOIN GRUPO_9800.BI_tipo_sector ts ON s.id_tipo_sector = ts.id_tipo_sector 
 	JOIN GRUPO_9800.carrera ca ON i.codigo_carrera = ca.codigo_carrera
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
-    GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo
+    GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo,ti.id_tipo_incidente
 END
 GO
+
 
 -- Tabla de tiempo
 
@@ -805,6 +860,23 @@ END
 
 GO
 
+CREATE FUNCTION GRUPO_9800.IsZero (
+	@Number FLOAT,
+	@IsZeroNumber FLOAT
+)
+RETURNS FLOAT
+AS
+BEGIN
+
+	IF (@Number = 0)
+	BEGIN
+		SET @Number = @IsZeroNumber
+	END
+
+	RETURN (@Number)
+
+END
+GO
 CREATE FUNCTION GRUPO_9800.obtener_anio(@codigo_tiempo int)
 RETURNS INT
 AS 
@@ -915,7 +987,7 @@ GO
 -- OK 
 CREATE VIEW GRUPO_9800.promedioIncidentesPorEscuderiaXanio
 AS
-	SELECT cod_escuderia,t.anio, SUM(incidentes_totales) / COUNT(*) 'Promedio de incidentes'
+	SELECT cod_escuderia,t.anio, AVG(incidentes_totales) 'Promedio de incidentes'
 	FROM GRUPO_9800.BI_fact_table_incidentes ft
 	JOIN GRUPO_9800.BI_tiempo t ON t.cod_tiempo = ft.cod_tiempo  
 	GROUP BY cod_escuderia,t.anio,id_tipo_sector
@@ -1044,16 +1116,15 @@ CREATE VIEW GRUPO_9800.desgasteDeComponentePorVuelta
 AS
 
 SELECT vehiculo_numero,cod_escuderia,circuito_codigo,
-SUM(desgaste_caja_promedio / cantidad_de_vueltas) 'Desgaste promedio de la caja por auto por vuelta',
-SUM(potencia_motor_promedio / cantidad_de_vueltas )'Desgaste promedio del motor por auto por vuelta',
-SUM(desgaste_neumatico_promedio / cantidad_de_vueltas)  'Desgaste promedio de la neumatico por vuelta',
-SUM(desgaste_freno_promedio / cantidad_de_vueltas)  'Desgaste promedio del freno por auto por vuelta' 
+SUM(desgaste_caja_promedio / cantidad_de_vueltas) 'Desgaste promedio de la caja por vuelta',
+SUM(potencia_motor_promedio / cantidad_de_vueltas )'Desgaste promedio del motor por vuelta',
+SUM(desgaste_neumatico_promedio / cantidad_de_vueltas)  'Desgaste promedio del neumatico por vuelta',
+SUM(desgaste_freno_promedio / cantidad_de_vueltas)  'Desgaste promedio del freno por vuelta' 
 FROM GRUPO_9800.BI_fact_table_telemetria
 GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo
 
 GO
 
-select * from GRUPO_9800.BI_fact_table_telemetria
 
 /*
 select sum(desgaste_neumatico_promedio)/21
