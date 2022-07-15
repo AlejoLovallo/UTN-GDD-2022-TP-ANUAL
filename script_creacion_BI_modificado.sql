@@ -274,7 +274,7 @@ BEGIN
 		CREATE TABLE GRUPO_9800.BI_circuito (
             circuito_codigo INT PRIMARY KEY,
             circuito_nombre NVARCHAR(255),
-            id_pais smallint,
+            id_pais smallint
         );
 
 		CREATE TABLE GRUPO_9800.BI_vehiculo (
@@ -282,7 +282,7 @@ BEGIN
             vehiculo_modelo NVARCHAR(255),
             cod_escuderia INT ,
             cod_piloto INT ,
-            PRIMARY KEY (vehiculo_numero, cod_escuderia)
+            PRIMARY KEY (vehiculo_numero,cod_escuderia)
         );
 
 		 CREATE TABLE GRUPO_9800.BI_tiempo(
@@ -1089,7 +1089,7 @@ incidentes
 
 -- OK
 
-GO--REVISAR 
+GO
 CREATE VIEW GRUPO_9800.top3CircuitosMasPeligrosos
 AS
 
@@ -1195,10 +1195,6 @@ AS
 	WHERE groups.[ROW NUMBER] <=1
 	AND [tiempo_de_vuelta] != 0
 	GROUP BY groups.escuderia,groups.circuito,groups.anio
-
-
-
---Hay que ver porque los tipos de sector del 1 y el 2 me dan lo mismo
 
 
 --Desgaste promedio de cada componente de cada auto por vuelta por 
