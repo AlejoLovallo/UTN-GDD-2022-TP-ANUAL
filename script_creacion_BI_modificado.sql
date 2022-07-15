@@ -245,7 +245,7 @@ BEGIN
 		CREATE TABLE GRUPO_9800.BI_carrera (
             codigo_carrera INT PRIMARY KEY,
 			carrera_clima varchar(100),
-			carrera_cant_vueltas INT
+			numero_de_vuelta INT
 
         );
 
@@ -358,7 +358,11 @@ CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_carrera
 AS
 BEGIN
 	INSERT INTO GRUPO_9800.BI_carrera
-	SELECT codigo_carrera,carrera_clima,carrera_cant_vueltas FROM GRUPO_9800.carrera
+	SELECT c.codigo_carrera,carrera_clima, t.tele_auto_numero_vuelta
+	FROM GRUPO_9800.carrera c
+	JOIN GRUPO_9800.telemetria_auto t ON c.codigo_carrera = t.codigo_carrera
+	GROUP BY c.codigo_carrera,carrera_clima,t.tele_auto_numero_vuelta
+	order by c.codigo_carrera,t.tele_auto_numero_vuelta
 END
 GO
 
@@ -812,8 +816,16 @@ BEGIN
 	INSERT INTO GRUPO_9800.BI_fact_table_telemetria (circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cod_piloto,numero_de_vuelta,codigo_carrera,
 											desgaste_caja_promedio,desgaste_motor_promedio,desgaste_neumatico_promedio,desgaste_freno_promedio,
 											consumo_combustible_promedio,tiempo_de_vuelta,maxima_velocidad_alcanzada)
-	SELECT tele.circuito_codigo,tele.cod_escuderia,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto,tele.tele_auto_numero_vuelta,tele.codigo_carrera,
-	(SELECT temp_c.desgaste FROM GRUPO_9800.BI_temp_desgaste_caja temp_c
+	SELECT tele.circuito_codigo,
+			tele.cod_escuderia,
+			tele.vehiculo_numero,
+			s.id_tipo_sector,
+			t.cod_tiempo,
+			p.cod_piloto,
+			tele.tele_auto_numero_vuelta,
+			tele.codigo_carrera,
+				(
+					SELECT temp_c.desgaste FROM GRUPO_9800.BI_temp_desgaste_caja temp_c
 					JOIN GRUPO_9800.BI_temp_telemetria_caja_y_motor temp_t ON temp_c.caja_nro_serie = temp_t.caja_nro_serie AND temp_t.tipo_de_sector = temp_c.tipo_de_sector AND temp_c.numero_vuelta = temp_t.numero_vuelta AND temp_c.carrera = temp_t.carrera
 					WHERE temp_c.caja_nro_serie = temp_t.caja_nro_serie 
 					AND tele.vehiculo_numero = temp_t.vehiculo_numero
@@ -824,8 +836,10 @@ BEGIN
 					AND t.cod_tiempo = temp_t.cod_tiempo
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_t.carrera
-					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_c.desgaste,temp_c.carrera),
-	(SELECT temp_m.desgaste FROM GRUPO_9800.BI_temp_desgaste_motor temp_m
+					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_c.desgaste,temp_c.carrera
+				),
+				(
+					SELECT temp_m.desgaste FROM GRUPO_9800.BI_temp_desgaste_motor temp_m
 					JOIN GRUPO_9800.BI_temp_telemetria_caja_y_motor temp_t ON temp_t.motor_nro_serie = temp_m.motor_nro_serie AND temp_t.tipo_de_sector = temp_m.tipo_de_sector AND temp_m.numero_vuelta = temp_t.numero_vuelta AND temp_m.carrera = temp_t.carrera
 					WHERE tele.vehiculo_numero = temp_t.vehiculo_numero
 					AND tele.cod_escuderia = temp_t.cod_escuderia
@@ -835,8 +849,10 @@ BEGIN
 					AND t.cod_tiempo = temp_t.cod_tiempo
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_t.carrera
-					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_m.desgaste,temp_m.carrera),
-	(SELECT AVG(temp_n.desgaste) FROM GRUPO_9800.BI_temp_desgaste_neumatico temp_n
+					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_m.desgaste,temp_m.carrera
+				),
+				(
+					SELECT AVG(temp_n.desgaste) FROM GRUPO_9800.BI_temp_desgaste_neumatico temp_n
 					JOIN GRUPO_9800.BI_temp_telemetria_neumatico temp_t ON temp_t.neumatico_nro_serie = temp_n.neumatico_nro_serie   AND temp_t.tipo_de_sector = temp_n.tipo_de_sector AND temp_n.numero_vuelta = temp_t.numero_vuelta AND temp_n.carrera = temp_t.carrera
 					WHERE tele.vehiculo_numero = temp_t.vehiculo_numero
 					AND tele.cod_escuderia = temp_t.cod_escuderia
@@ -846,8 +862,10 @@ BEGIN
 					AND t.cod_tiempo = temp_t.cod_tiempo
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_n.carrera
-					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_t.carrera) ,
-	(SELECT AVG(temp_f.desgaste) FROM GRUPO_9800.BI_temp_desgaste_freno temp_f
+					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_t.carrera
+				),
+				(
+					SELECT AVG(temp_f.desgaste) FROM GRUPO_9800.BI_temp_desgaste_freno temp_f
 					JOIN GRUPO_9800.BI_temp_telemetria_freno temp_t ON temp_t.freno_nro_serie = temp_f.freno_nro_serie  AND temp_t.tipo_de_sector = temp_f.tipo_de_sector AND temp_f.numero_vuelta = temp_t.numero_vuelta AND temp_f.carrera = temp_t.carrera
 					WHERE tele.vehiculo_numero = temp_t.vehiculo_numero
 					AND tele.cod_escuderia = temp_t.cod_escuderia
@@ -857,8 +875,10 @@ BEGIN
 					AND t.cod_tiempo = temp_t.cod_tiempo
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_f.carrera
-					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_f.carrera) ,
-	(SELECT temp_c.consumo FROM GRUPO_9800.BI_temp_consumo_combustible temp_c
+					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_f.carrera
+				),
+					(
+					SELECT temp_c.consumo FROM GRUPO_9800.BI_temp_consumo_combustible temp_c
 					JOIN GRUPO_9800.BI_temp_telemetria_caja_y_motor temp_t ON temp_t.motor_nro_serie= temp_c.motor_nro_serie  AND temp_t.tipo_de_sector = temp_c.tipo_de_sector AND temp_c.numero_vuelta = temp_t.numero_vuelta AND temp_c.carrera = temp_t.carrera
 					WHERE tele.vehiculo_numero = temp_t.vehiculo_numero
 					AND tele.cod_escuderia = temp_t.cod_escuderia
@@ -868,8 +888,9 @@ BEGIN
 					AND t.cod_tiempo = temp_t.cod_tiempo
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_t.carrera
-					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_c.consumo,temp_t.carrera) 'Combustible utilizado',
-	(SELECT temp_t.tiempo FROM GRUPO_9800.BI_temp_tiempo temp_t
+					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_c.consumo,temp_t.carrera
+					) 'Combustible utilizado',
+					(SELECT temp_t.tiempo FROM GRUPO_9800.BI_temp_tiempo temp_t
 			WHERE tele.cod_escuderia =  temp_t.cod_escuderia
 			AND tele.circuito_codigo = temp_t.circuito_codigo
 			AND tele.vehiculo_numero = temp_t.vehiculo_numero
@@ -880,10 +901,10 @@ BEGIN
 			GROUP BY temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.vehiculo_numero,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector, temp_t.carrera,temp_t.tiempo) 'Tiempo consumido por sector',
 	MAX(tele.tele_auto_velocidad) 'Velocidad maxima'
 	FROM GRUPO_9800.telemetria_auto tele
-	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector
+	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector 
 	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
 	JOIN GRUPO_9800.BI_piloto p ON v.cod_piloto = p.cod_piloto
-	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
+	JOIN GRUPO_9800.BI_tiempo t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
 	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto,tele.tele_auto_numero_vuelta,tele.codigo_carrera
 
 

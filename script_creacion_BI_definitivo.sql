@@ -464,7 +464,7 @@ BEGIN
 	FROM GRUPO_9800.parada_box p 
 	JOIN GRUPO_9800.parada_box_por_vehiculo pv ON p.cod_parada_box = pv.cod_parada_box
 	JOIN GRUPO_9800.carrera carr ON carr.codigo_carrera = p.codigo_carrera 
-	WHERE YEAR(carr.carrera_fecha) = t.anio
+	WHERE YEAR(carr.carrera_fecha) = GRUPO_9800.obtener_anio(t.cod_tiempo)
 	AND carr.circuito_codigo = ci.circuito_codigo
 	AND pv.cod_escuderia = e.cod_escuderia
 	GROUP BY YEAR(carr.carrera_fecha),carr.circuito_codigo,pv.cod_escuderia) 'Cantidad de paradas de box',
@@ -486,7 +486,7 @@ BEGIN
     JOIN GRUPO_9800.carrera ca ON (pb.codigo_carrera = ca.codigo_carrera)
     JOIN GRUPO_9800.BI_circuito ci ON (ca.circuito_codigo = ci.circuito_codigo)
 	JOIN GRUPO_9800.BI_tiempo t ON YEAR(ca.carrera_fecha) = t.anio AND GRUPO_9800.obtener_cuatrimestre(ca.carrera_fecha) = t.cuatrimestre
-	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo,t.anio
+	GROUP BY e.cod_escuderia, ci.circuito_codigo,t.cod_tiempo
 
 END
 /*
@@ -516,7 +516,7 @@ BEGIN
 	FROM GRUPO_9800.incidente inc 
 	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
 	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
-	WHERE YEAR(carr.carrera_fecha) = t.anio
+	WHERE YEAR(carr.carrera_fecha) =  GRUPO_9800.obtener_anio(t.cod_tiempo)
 	AND inc.circuito_codigo = i.circuito_codigo
 	GROUP BY YEAR(carr.carrera_fecha),inc.circuito_codigo) 'Incidentes totales',
 	(SELECT COUNT(inc_a.cod_incidente)
@@ -524,14 +524,14 @@ BEGIN
 	JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
 	JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
 	JOIN GRUPO_9800.sector se ON se.codigo_sector = inc.codigo_sector
-	WHERE t.anio = YEAR(carr.carrera_fecha)
+	WHERE  GRUPO_9800.obtener_anio(t.cod_tiempo) = YEAR(carr.carrera_fecha)
 	AND se.id_tipo_sector = ts.id_tipo_sector
 	AND e.cod_escuderia = inc_a.cod_escuderia
 	GROUP BY  YEAR(carr.carrera_fecha),se.id_tipo_sector,inc_a.cod_escuderia) / (SELECT COUNT(inc_a.cod_incidente) 
 																				FROM GRUPO_9800.incidente inc 
 																				JOIN GRUPO_9800.incidente_por_auto inc_a ON inc_a.cod_incidente = inc.cod_incidente
 																				JOIN GRUPO_9800.carrera carr ON inc.codigo_carrera = carr.codigo_carrera
-																				WHERE YEAR(carr.carrera_fecha) = t.anio
+																				WHERE YEAR(carr.carrera_fecha) = GRUPO_9800.obtener_anio(t.cod_tiempo)
 																				AND inc_a.cod_escuderia = e.cod_escuderia
 																				GROUP BY YEAR(carr.carrera_fecha),inc_a.cod_escuderia) 'Promedio de incidentes'
 	FROM GRUPO_9800.BI_circuito c
@@ -542,7 +542,7 @@ BEGIN
 	JOIN GRUPO_9800.BI_tipo_sector ts ON s.id_tipo_sector = ts.id_tipo_sector 
 	JOIN GRUPO_9800.carrera ca ON i.codigo_carrera = ca.codigo_carrera
 	JOIN GRUPO_9800.BI_TIEMPO t ON YEAR(ca.carrera_fecha) = t.anio 
-    GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo,t.anio
+    GROUP BY i.circuito_codigo,ts.id_tipo_sector,e.cod_escuderia,t.cod_tiempo
 END
 GO
 /*
