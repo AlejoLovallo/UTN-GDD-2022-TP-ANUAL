@@ -245,7 +245,7 @@ BEGIN
 		CREATE TABLE GRUPO_9800.BI_carrera (
             codigo_carrera INT,
 			carrera_clima varchar(100),
-			numero_de_vuelta INT,
+			numero_de_vuelta numeric(18,0),
 			PRIMARY KEY(codigo_carrera,numero_de_vuelta)
 
         );
@@ -318,13 +318,26 @@ BEGIN
 			consumo_combustible_promedio DECIMAL(18,6),
 			tiempo_de_vuelta NUMERIC(18,10),
 			maxima_velocidad_alcanzada DECIMAL(18,6),
-			PRIMARY KEY(circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cod_piloto,numero_de_vuelta)
-			--FOREIGN KEY(circuito_codigo) REFERENCES GRUPO_9800.BI_circuito,
-			--FOREIGN KEY(id_tipo_sector)  REFERENCES GRUPO_9800.BI_tipo_sector,
-			--FOREIGN KEY(cod_escuderia)  REFERENCES GRUPO_9800.BI_escuderia,
-			--FOREIGN KEY(cod_tiempo)  REFERENCES GRUPO_9800.BI_tiempo
-			--Ver si van como FK
+			PRIMARY KEY(circuito_codigo,cod_escuderia,vehiculo_numero,id_tipo_sector,cod_tiempo,cod_piloto,numero_de_vuelta,codigo_carrera)	
 		)
+
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(circuito_codigo) REFERENCES GRUPO_9800.BI_circuito
+
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(id_tipo_sector)  REFERENCES GRUPO_9800.BI_tipo_sector
+
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(cod_escuderia)  REFERENCES GRUPO_9800.BI_escuderia
+
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(cod_tiempo)  REFERENCES GRUPO_9800.BI_tiempo
+
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(cod_piloto) REFERENCES GRUPO_9800.BI_piloto
+		
+		ALTER TABLE GRUPO_9800.BI_fact_table_telemetria
+		ADD FOREIGN KEY(codigo_carrera,numero_de_vuelta) REFERENCES GRUPO_9800.BI_carrera
  
         CREATE TABLE GRUPO_9800.BI_fact_table_paradas_de_box(
             cod_escuderia INT REFERENCES GRUPO_9800.BI_escuderia,
@@ -349,7 +362,6 @@ BEGIN
        
 END
 GO
-
 
 
 -----------------------------------------------------------------------------------------------------
@@ -678,14 +690,6 @@ BEGIN
 							GROUP BY motor_nro_serie,sect.codigo_sector,tt.circuito_codigo,tele_auto_numero_vuelta,id_tipo_sector,tt.codigo_carrera ) as aux GROUP BY [motor],[tipo_sector],[numero_vuelta],[carrera]
 	
 
-/*	INSERT INTO GRUPO_9800.BI_temp_tiempo_de_vuelta (circuito_codigo,cod_escuderia,vehiculo_numero,numero_vuelta,carrera,cod_tiempo,tiempo_de_vuelta)
-	SELECT circuito_codigo,cod_escuderia,vehiculo_numero,tele_auto_numero_vuelta,codigo_carrera,cod_tiempo,tipo_de_sector,MAX(tele_auto_tiempo_vuelta) - MIN(tele_auto_tiempo_vuelta)
-	FROM GRUPO_9800.telemetria_auto ta 
-	JOIN GRUPO_9800.BI_tiempo ON YEAR(tele_fecha) = anio  AND GRUPO_9800.obtener_cuatrimestre(tele_fecha) = cuatrimestre
-	where tele_auto_tiempo_vuelta <> 0
-	GROUP BY circuito_codigo,cod_escuderia,vehiculo_numero,tele_auto_numero_vuelta,cod_tiempo,codigo_carrera		
-	*/
-
 	INSERT INTO  GRUPO_9800.BI_temp_tiempo_de_vuelta(tipo_de_sector,vehiculo_numero,cod_escuderia,carrera,circuito_codigo,numero_vuelta,cod_tiempo,tiempo,ajuste_cambio_de_sector)
 	SELECT [tipo_sector],[vehiculo],[escuderia],[carrera],[circuito],[numero_vuelta],[codigo_tiempo],SUM([tiempo]),(SELECT MAX(tele_auto_tiempo_vuelta) 
 																				FROM GRUPO_9800.telemetria_auto
@@ -914,6 +918,8 @@ BEGIN
 END
 GO
 
+
+
 -- Migracion fact table paradas de box
 go
 CREATE PROCEDURE [GRUPO_9800].MIGRATE_BI_fact_table_paradas_de_box --LISTO
@@ -961,7 +967,6 @@ BEGIN
 END
 GO
 
-SELECT * FROM GRUPO_9800.BI_fact_table_incidentes
 -- Creacion de funciones 
 
 CREATE FUNCTION GRUPO_9800.obtener_cuatrimestre (@Date smalldatetime )
@@ -1057,6 +1062,7 @@ GO
 
 -- Ejecuto procedures de tabla de hechos y tablas BI
 EXEC [GRUPO_9800].CREATE_BI_TABLES
+EXEC [GRUPO_9800].MIGRAR_BI_carrera
 EXEC [GRUPO_9800].MIGRAR_BI_tipo_sector
 EXEC [GRUPO_9800].MIGRAR_BI_circuito
 EXEC [GRUPO_9800].MIGRAR_BI_escuderia
@@ -1071,7 +1077,6 @@ EXEC [GRUPO_9800].MIGRATE_BI_fact_table_telemetria
 EXEC [GRUPO_9800].DROP_BI_temp_tables
 EXEC [GRUPO_9800].MIGRATE_BI_fact_table_paradas_de_box
 EXEC [GRUPO_9800].MIGRATE_BI_fact_table_incidentes
-
 
 
 -----------------------------------------------------------------------------------------------------------------------
