@@ -243,9 +243,10 @@ BEGIN
         );
 		
 		CREATE TABLE GRUPO_9800.BI_carrera (
-            codigo_carrera INT PRIMARY KEY,
+            codigo_carrera INT,
 			carrera_clima varchar(100),
-			numero_de_vuelta INT
+			numero_de_vuelta INT,
+			PRIMARY KEY(codigo_carrera,numero_de_vuelta)
 
         );
 
@@ -357,7 +358,7 @@ GO
 CREATE PROCEDURE [GRUPO_9800].MIGRAR_BI_carrera
 AS
 BEGIN
-	INSERT INTO GRUPO_9800.BI_carrera
+	INSERT INTO GRUPO_9800.BI_carrera(codigo_carrera,carrera_clima,numero_de_vuelta)
 	SELECT c.codigo_carrera,carrera_clima, t.tele_auto_numero_vuelta
 	FROM GRUPO_9800.carrera c
 	JOIN GRUPO_9800.telemetria_auto t ON c.codigo_carrera = t.codigo_carrera
@@ -877,7 +878,7 @@ BEGIN
 					AND tele.codigo_carrera = temp_f.carrera
 					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_f.carrera
 				),
-					(
+				(
 					SELECT temp_c.consumo FROM GRUPO_9800.BI_temp_consumo_combustible temp_c
 					JOIN GRUPO_9800.BI_temp_telemetria_caja_y_motor temp_t ON temp_t.motor_nro_serie= temp_c.motor_nro_serie  AND temp_t.tipo_de_sector = temp_c.tipo_de_sector AND temp_c.numero_vuelta = temp_t.numero_vuelta AND temp_c.carrera = temp_t.carrera
 					WHERE tele.vehiculo_numero = temp_t.vehiculo_numero
@@ -889,23 +890,25 @@ BEGIN
 					AND tele.tele_auto_numero_vuelta = temp_t.numero_vuelta
 					AND tele.codigo_carrera = temp_t.carrera
 					GROUP BY temp_t.vehiculo_numero,temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector,temp_t.cod_piloto,temp_c.consumo,temp_t.carrera
-					) 'Combustible utilizado',
-					(SELECT temp_t.tiempo FROM GRUPO_9800.BI_temp_tiempo temp_t
-			WHERE tele.cod_escuderia =  temp_t.cod_escuderia
-			AND tele.circuito_codigo = temp_t.circuito_codigo
-			AND tele.vehiculo_numero = temp_t.vehiculo_numero
-			AND t.cod_tiempo = temp_t.cod_tiempo
-			AND tele.tele_auto_numero_vuelta =  temp_t.numero_vuelta
-			AND s.id_tipo_sector = temp_t.tipo_de_sector
-			AND tele.codigo_carrera = temp_t.carrera
-			GROUP BY temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.vehiculo_numero,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector, temp_t.carrera,temp_t.tiempo) 'Tiempo consumido por sector',
-	MAX(tele.tele_auto_velocidad) 'Velocidad maxima'
-	FROM GRUPO_9800.telemetria_auto tele
-	JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector 
-	JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
-	JOIN GRUPO_9800.BI_piloto p ON v.cod_piloto = p.cod_piloto
-	JOIN GRUPO_9800.BI_tiempo t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
-	GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto,tele.tele_auto_numero_vuelta,tele.codigo_carrera
+				) 'Combustible utilizado',
+				(
+					SELECT temp_t.tiempo FROM GRUPO_9800.BI_temp_tiempo temp_t
+					WHERE tele.cod_escuderia =  temp_t.cod_escuderia
+					AND tele.circuito_codigo = temp_t.circuito_codigo
+					AND tele.vehiculo_numero = temp_t.vehiculo_numero
+					AND t.cod_tiempo = temp_t.cod_tiempo
+					AND tele.tele_auto_numero_vuelta =  temp_t.numero_vuelta
+					AND s.id_tipo_sector = temp_t.tipo_de_sector
+					AND tele.codigo_carrera = temp_t.carrera
+					GROUP BY temp_t.cod_escuderia,temp_t.circuito_codigo,temp_t.vehiculo_numero,temp_t.cod_tiempo,temp_t.numero_vuelta,temp_t.tipo_de_sector, temp_t.carrera,temp_t.tiempo
+				) 'Tiempo consumido por sector',
+				MAX(tele.tele_auto_velocidad) 'Velocidad maxima'
+		FROM GRUPO_9800.telemetria_auto tele
+		JOIN GRUPO_9800.sector s ON tele.codigo_sector = s.codigo_sector 
+		JOIN GRUPO_9800.BI_vehiculo v ON tele.vehiculo_numero = v.vehiculo_numero AND tele.cod_escuderia = v.cod_escuderia
+		JOIN GRUPO_9800.BI_piloto p ON v.cod_piloto = p.cod_piloto
+		JOIN GRUPO_9800.BI_tiempo t ON YEAR(tele.tele_fecha) = t.anio  AND GRUPO_9800.obtener_cuatrimestre(tele.tele_fecha) = t.cuatrimestre
+		GROUP BY tele.cod_escuderia,tele.circuito_codigo,tele.vehiculo_numero,s.id_tipo_sector,t.cod_tiempo,p.cod_piloto,tele.tele_auto_numero_vuelta,tele.codigo_carrera
 
 
 END
@@ -958,6 +961,7 @@ BEGIN
 END
 GO
 
+SELECT * FROM GRUPO_9800.BI_fact_table_incidentes
 -- Creacion de funciones 
 
 CREATE FUNCTION GRUPO_9800.obtener_cuatrimestre (@Date smalldatetime )
@@ -1138,16 +1142,7 @@ AS
 	GROUP BY circuito_codigo
 	ORDER BY 2 DESC
 
-/*
-SELECT * FROM GRUPO_9800.tiempoPromedioPorCuatrimestre
-SELECT * FROM GRUPO_9800.top3CircuitosMasPeligrosos
-SELECT * FROM GRUPO_9800.paradasPorCircuito
-SELECT * FROM GRUPO_9800.promedioIncidentesPorEscuderiaXanio
-SELECT * FROM GRUPO_9800.top3MayorTiempoEnBoxes
-SELECT * FROM GRUPO_9800.maximaVelocidadPorAutoPorSector
-SELECT * FROM GRUPO_9800.top3CircuitosMayorConsumoDeCombustible
-SELECT * FROM GRUPO_9800.mejorTiempoDeVuelta
-*/
+
 
 --Máxima velocidad alcanzada por cada auto en cada tipo de sector de cada 
 --circuito.
@@ -1223,3 +1218,16 @@ GROUP BY vehiculo_numero,cod_escuderia,circuito_codigo
 
 GO
 
+
+
+/*
+SELECT * FROM GRUPO_9800.tiempoPromedioPorCuatrimestre
+SELECT * FROM GRUPO_9800.top3CircuitosMasPeligrosos
+SELECT * FROM GRUPO_9800.paradasPorCircuito
+SELECT * FROM GRUPO_9800.promedioIncidentesPorEscuderiaXanio
+SELECT * FROM GRUPO_9800.top3MayorTiempoEnBoxes
+SELECT * FROM GRUPO_9800.maximaVelocidadPorAutoPorSector
+SELECT * FROM GRUPO_9800.top3CircuitosMayorConsumoDeCombustible
+SELECT * FROM GRUPO_9800.mejorTiempoDeVuelta
+SELECT * FROM GRUPO_9800.desgasteDeComponentePorVuelta
+*/
